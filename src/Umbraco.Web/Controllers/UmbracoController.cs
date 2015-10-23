@@ -5,7 +5,7 @@ using Microsoft.AspNet.Mvc.Filters;
 
 namespace Umbraco.Web.Controllers
 {
-   
+
     //public class UmbracoRouteConstraintAttribute :
     //    RouteDataActionConstraint
     ////RouteConstraintAttribute
@@ -17,19 +17,21 @@ namespace Umbraco.Web.Controllers
     //    }
     //}
 
+    /// <summary>
+    /// The default Umbraco rendering controller (i.e. previously RenderMvcController)
+    /// </summary>
     //[UmbracoRouteConstraint]
-    [UmbracoAction]
+    [UmbracoActionConstraint]
     [Route("{*_umbracoRoute:Required}")]
-    //[Route("api/Company/{txtFile}", Name = "Company")]
     public class UmbracoController : Controller
     {
-        private readonly FileContentContext _fileContent;
+        private readonly UmbracoContext _umbraco;
 
-        public UmbracoController(FileContentContext fileContent)
+        public UmbracoController(UmbracoContext umbraco)
         {
-            _fileContent = fileContent;
+            _umbraco = umbraco;
         }
-        
+
         public virtual string Index(string txtFile)
         {
             //if (this.ViewBag.something != "viewdata works")
@@ -39,11 +41,11 @@ namespace Umbraco.Web.Controllers
 
             //return this.ModelState["test"].RawValue.ToString();
 
-            if (string.IsNullOrEmpty(_fileContent.Content))
+            if (string.IsNullOrEmpty(_umbraco.Content))
             {
                 throw new Exception("No content");
             }
-            return _fileContent.Content;
+            return _umbraco.Content;
         }
 
         public override void OnActionExecuting(ActionExecutingContext context)

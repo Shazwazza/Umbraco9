@@ -2,7 +2,7 @@
 {
     public class CoolController : UmbracoController
     {
-        public CoolController(FileContentContext fileContent) : base(fileContent)
+        public CoolController(UmbracoContext umbraco) : base(umbraco)
         {
         }
 

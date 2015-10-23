@@ -7,12 +7,10 @@ namespace Umbraco.Web.Controllers
     public class UmbracoActionConstraint : IActionConstraint
     {
 
-        private string _basePath;
-        private FileContentContext _fileContent;
-        public UmbracoActionConstraint(string basePath, FileContentContext fileContent)
+        private readonly UmbracoContext _umbCtx;
+        public UmbracoActionConstraint(UmbracoContext umbCtx)
         {
-            _fileContent = fileContent;
-            _basePath = basePath;
+            _umbCtx = umbCtx;
         }
 
 
@@ -26,20 +24,13 @@ namespace Umbraco.Web.Controllers
 
         public bool Accept(ActionConstraintContext context)
         {
+            //Initialize the context, this will be called a few times but the initialize logic
+            // only executes once. There might be a nicer way to do this but the RouteContext and 
+            // other request scoped instances are not available yet.
+            _umbCtx.Initialize(context.RouteContext);
 
-            //This would be like looking up content in Umbraco
-            var path = context.RouteContext.RouteData.Values["_umbracoRoute"] + ".txt";
-
-            var filePath = Path.Combine(_basePath, "Content", path);
-
-            if (!File.Exists(filePath))
-            {
-                return false;
-            }
-
-            _fileContent.Content = File.ReadAllText(filePath);
-
-
+            if (_umbCtx.HasContent == false) return false;
+            
             //Is this a POST
             if (context.RouteContext.HttpContext.Request.Method == "POST")
             {

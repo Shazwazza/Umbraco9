@@ -6,7 +6,7 @@ using Microsoft.Framework.DependencyInjection;
 
 namespace Umbraco.Web.Controllers
 {
-    public class SurfaceActionConstraintFactory : Attribute, IActionConstraintFactory
+    public class SurfaceActionConstraintAttribute : Attribute, IActionConstraintFactory
     {
         
         public IActionConstraint CreateInstance(IServiceProvider services)

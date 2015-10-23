@@ -27,7 +27,7 @@ namespace Umbraco.Web
             services.AddSingleton<IControllerActivator, UmbracoControllerActivator>();
             //services.AddSingleton<UmbracoAssemblyProvider>();
             services.AddSingleton<IUmbracoConfig, UmbracoConfig>();
-            services.AddScoped<FileContentContext>();            
+            services.AddScoped<UmbracoContext>();
 
             return services;
         }

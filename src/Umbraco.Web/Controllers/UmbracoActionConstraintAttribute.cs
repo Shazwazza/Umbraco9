@@ -6,7 +6,7 @@ using Microsoft.Framework.DependencyInjection;
 
 namespace Umbraco.Web.Controllers
 {
-    public class UmbracoAction : Attribute, IActionConstraintFactory
+    public class UmbracoActionConstraintAttribute : Attribute, IActionConstraintFactory
         //, IControllerModelConvention
         //,IActionModelConvention
     {
@@ -24,13 +24,8 @@ namespace Umbraco.Web.Controllers
 
         public IActionConstraint CreateInstance(IServiceProvider services)
         {
-            var appEnv = services.GetRequiredService<IApplicationEnvironment>();
-            var hostEnv = services.GetRequiredService<IHostingEnvironment>();
-            
-            //don't do this later!
-            var fileContent = services.GetRequiredService<FileContentContext>();
-
-            return new UmbracoActionConstraint(hostEnv.WebRootPath, fileContent);
+            var umbCtxBuilder = services.GetRequiredService<UmbracoContext>();
+            return new UmbracoActionConstraint(umbCtxBuilder);
         }
     }
 }
