@@ -1,6 +1,10 @@
 using System.IO;
 using Microsoft.AspNet.Routing;
 using Microsoft.Dnx.Runtime;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
+using Umbraco.Web.Models;
 
 namespace Umbraco.Web
 {
@@ -30,15 +34,25 @@ namespace Umbraco.Web
 
             var filePath = Path.Combine(_appEnv.ApplicationBasePath, "UmbracoContent", path);
 
-            Content = !File.Exists(filePath) ? null : File.ReadAllText(filePath);
+            if (File.Exists(filePath))
+            {
+                using (var file = File.OpenText(filePath))
+                {
+                    var serializer = new JsonSerializer
+                    {
+                        ContractResolver = new CamelCasePropertyNamesContractResolver()
+                    };
+                    Content = (Content)serializer.Deserialize(file, typeof(Content));
+                }                
+            }            
 
             Initialized = true;
         }
 
         public bool Initialized { get; private set; }
 
-        public bool HasContent => string.IsNullOrEmpty(Content) == false;
+        public bool HasContent => Content != null;
 
-        public string Content { get; set; }
+        public Content Content { get; set; }
     }
 }

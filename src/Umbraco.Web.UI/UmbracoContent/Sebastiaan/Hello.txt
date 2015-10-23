@@ -1,0 +1,5 @@
+﻿{
+	name: "Hello Sebastiaan!!!",
+	view: "UmbracoSebastiaan",
+	contentType: "Home"
+}

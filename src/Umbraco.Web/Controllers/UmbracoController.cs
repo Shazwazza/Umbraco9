@@ -32,7 +32,8 @@ namespace Umbraco.Web.Controllers
             _umbraco = umbraco;
         }
 
-        public virtual string Index(string txtFile)
+        //TODO: need to model bind the 'Content' item
+        public virtual ActionResult Index(string path)
         {
             //if (this.ViewBag.something != "viewdata works")
             //{
@@ -41,11 +42,13 @@ namespace Umbraco.Web.Controllers
 
             //return this.ModelState["test"].RawValue.ToString();
 
-            if (string.IsNullOrEmpty(_umbraco.Content))
+            if (_umbraco.Content == null)
             {
                 throw new Exception("No content");
             }
-            return _umbraco.Content;
+
+            //TODO: Need view engine
+            return View("~/Views/" + _umbraco.Content.View + ".cshtml", _umbraco.Content);
         }
 
         public override void OnActionExecuting(ActionExecutingContext context)

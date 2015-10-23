@@ -1,0 +1,5 @@
+﻿{
+	name: "Home page",
+	view: "UmbracoHome",
+	contentType: "Home"
+}

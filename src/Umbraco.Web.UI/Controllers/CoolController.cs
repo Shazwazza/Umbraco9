@@ -1,4 +1,6 @@
-﻿namespace Umbraco.Web.Controllers
+﻿using Microsoft.AspNet.Mvc;
+
+namespace Umbraco.Web.Controllers
 {
     public class CoolController : UmbracoController
     {
@@ -6,9 +8,9 @@
         {
         }
 
-        public override string Index(string txtFile)
+        public override ActionResult Index(string path)
         {
-            return "THIS IS SO COOL " + txtFile;
+            return Content("THIS IS SO COOL " + path);
         }
 
        
