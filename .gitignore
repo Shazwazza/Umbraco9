@@ -194,3 +194,6 @@ FakesAssemblies/
 
 # Visual Studio 6 workspace options file
 *.opt
+src/*/project.lock.json
+src/Umbraco/wwwroot/lib/*
+src/Umbraco.Web.UI/wwwroot/lib/*

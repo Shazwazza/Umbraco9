@@ -1,0 +1,19 @@
+﻿{
+    "version": "1.0.0-*",
+    "title": "Umbraco.Web",
+    "description": "Umbraco.Web Class Library",
+    "authors": [ "Shannon Deminick" ],
+    "tags": [ "" ],
+    "projectUrl": "",
+    "licenseUrl": "",
+
+    "dependencies": {
+        "Microsoft.AspNet.Mvc": "6.0.0-beta8",
+        "Microsoft.Framework.Configuration.Abstractions": "1.0.0-beta8",
+        "Microsoft.Framework.Configuration.Json": "1.0.0-beta8"
+    },
+
+    "frameworks": {
+        "dnx451": { }       
+    }
+}
