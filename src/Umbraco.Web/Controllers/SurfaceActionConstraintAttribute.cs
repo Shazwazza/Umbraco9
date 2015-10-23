@@ -11,13 +11,8 @@ namespace Umbraco.Web.Controllers
         
         public IActionConstraint CreateInstance(IServiceProvider services)
         {
-            var appEnv = services.GetRequiredService<IApplicationEnvironment>();
-            var hostEnv = services.GetRequiredService<IHostingEnvironment>();
-
-            ////don't do this later!
-            //var fileContent = services.GetRequiredService<IContextAccessor<string>>();
-
-            return new SurfaceActionConstraint(hostEnv.WebRootPath);
+            var umbCtx = services.GetRequiredService<UmbracoContext>();            
+            return new SurfaceActionConstraint(umbCtx);
         }
     }
 }

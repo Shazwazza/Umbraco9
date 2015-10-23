@@ -1,4 +1,6 @@
-﻿@model Umbraco.Web.Models.Content
+﻿@using Umbraco.Web;
+@inject UmbracoContext UmbracoContext
+@model Umbraco.Web.Models.Content
 
 @{
     ViewData["Title"] = Model.Name;
@@ -9,4 +11,14 @@
     <h1>@Model.Name</h1>
 
     <p>Hello world, I'm an Umbraco document</p>
+
+    <div>
+        @using(Html.BeginUmbracoForm(UmbracoContext, "", ""))
+        {
+            <label for="name"></label>
+            <input type="text" name="name" id="name" />
+            <br />
+            <button type="submit">Submit</button>
+        }        
+    </div>
 </section>

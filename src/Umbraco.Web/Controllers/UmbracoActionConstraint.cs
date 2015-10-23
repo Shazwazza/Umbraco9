@@ -1,9 +1,16 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Microsoft.AspNet.Mvc.ActionConstraints;
 using Microsoft.AspNet.Mvc.Controllers;
 
 namespace Umbraco.Web.Controllers
 {
+    /// <summary>
+    /// This checks the current route to see if it is an Umbraco route
+    /// </summary>
+    /// <remarks>
+    /// This is also the process that initializes the UmbracoContext
+    /// </remarks>
     public class UmbracoActionConstraint : IActionConstraint
     {
 
@@ -13,14 +20,7 @@ namespace Umbraco.Web.Controllers
             _umbCtx = umbCtx;
         }
 
-
-        public int Order
-        {
-            get
-            {
-                return 0;
-            }
-        }
+        public int Order => 0;
 
         public bool Accept(ActionConstraintContext context)
         {
@@ -32,10 +32,9 @@ namespace Umbraco.Web.Controllers
             if (_umbCtx.HasContent == false) return false;
             
             //Is this a POST
-            if (context.RouteContext.HttpContext.Request.Method == "POST")
+            if (context.RouteContext.HttpContext.Request.Method.Equals("POST", StringComparison.InvariantCultureIgnoreCase))
             {
-                if (((ControllerActionDescriptor)context.CurrentCandidate.Action)
-                    .ControllerName == "TestSurface")
+                if (((ControllerActionDescriptor)context.CurrentCandidate.Action).ControllerName == "TestSurface")
                 {
                     return true;
                 }
@@ -43,13 +42,7 @@ namespace Umbraco.Web.Controllers
 
             ////NOTE: This get's bound currently
             //context.RouteContext.RouteData.Values["txtFile"] = filePath;
-
-            string altTemplate = context.RouteContext.HttpContext.Request.Query["altTemplate"];
-            if (string.IsNullOrEmpty(altTemplate))
-            {
-                altTemplate = "Umbraco";
-            }
-
+            
             //string actionNameRequest =
             //    context.RouteContext.HttpContext.Request.Query["actionName"] ??
             //"Index";
@@ -64,7 +57,7 @@ namespace Umbraco.Web.Controllers
             //}
 
             //OR You could do this:
-            if (((ControllerActionDescriptor)context.CurrentCandidate.Action).ControllerName == altTemplate)
+            if (((ControllerActionDescriptor)context.CurrentCandidate.Action).ControllerName == _umbCtx.AltTemplate)
             {
                 return true;
             }

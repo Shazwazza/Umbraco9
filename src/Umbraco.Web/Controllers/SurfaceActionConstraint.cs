@@ -6,35 +6,24 @@ namespace Umbraco.Web.Controllers
     public class SurfaceActionConstraint : IActionConstraint
     {
 
-        private string _basePath;
-        public SurfaceActionConstraint(string basePath)
+        private readonly UmbracoContext _umbCtx;
+        public SurfaceActionConstraint(UmbracoContext umbCtx)
         {
-            _basePath = basePath;
+            _umbCtx = umbCtx;
         }
 
-
-        public int Order
-        {
-            get
-            {
-                return 0;
-            }
-        }
+        public int Order => 0;
 
         public bool Accept(ActionConstraintContext context)
         {
 
-            ////This would be like looking up content in Umbraco
-            //var path = context.RouteContext.RouteData.Values["_umbracoRoute"] + ".txt";
 
-            //var filePath = Path.Combine(_basePath, "Content", path);
+            //Initialize the context, this will be called a few times but the initialize logic
+            // only executes once. There might be a nicer way to do this but the RouteContext and 
+            // other request scoped instances are not available yet.
+            _umbCtx.Initialize(context.RouteContext);
 
-            //if (!File.Exists(filePath))
-            //{
-            //    return false;
-            //}
-
-            //_fileContent.SetValue(File.ReadAllText(filePath));
+            if (_umbCtx.HasContent == false) return false;
 
             //NOTE: This was for testing at some point!
 
@@ -43,18 +32,7 @@ namespace Umbraco.Web.Controllers
             //{
             //    return true;
             //}
-
-            ////Is this a POST
-            //if (context.RouteContext.HttpContext.Request.Method == "POST")
-            //{
-            //    if (((ControllerActionDescriptor)context.CurrentCandidate.Action)
-            //        .ControllerName == "TestSurface")
-            //    {
-            //        return true;
-            //    }
-            //}
-
-
+            
             return false;
         }
     }

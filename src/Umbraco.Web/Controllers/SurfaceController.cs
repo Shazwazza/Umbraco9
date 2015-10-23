@@ -5,7 +5,7 @@ namespace Umbraco.Web.Controllers
     
     [SurfaceActionConstraint]
     [Route("{*_surfaceRoute:Required}")]
-    public class SurfaceController : Controller
+    public abstract class SurfaceController : Controller
     {
 
     }
