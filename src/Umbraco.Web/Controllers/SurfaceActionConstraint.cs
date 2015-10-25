@@ -21,7 +21,7 @@ namespace Umbraco.Web.Controllers
             //Initialize the context, this will be called a few times but the initialize logic
             // only executes once. There might be a nicer way to do this but the RouteContext and 
             // other request scoped instances are not available yet.
-            _umbCtx.Initialize(context.RouteContext);
+            _umbCtx.Initialize(context.RouteContext.RouteData);
 
             if (_umbCtx.HasContent == false) return false;
 

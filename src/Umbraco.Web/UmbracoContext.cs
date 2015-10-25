@@ -1,4 +1,6 @@
+using System;
 using System.IO;
+using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Routing;
 using Microsoft.Dnx.Runtime;
 using Newtonsoft.Json;
@@ -8,33 +10,34 @@ using Umbraco.Web.Models;
 
 namespace Umbraco.Web
 {
-  
     /// <summary>
     /// Request based context
     /// </summary>
     public class UmbracoContext
     {
-        private RouteContext _routeCtx;
+        private RouteData _routeData;
         private readonly IApplicationEnvironment _appEnv;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UmbracoContext(IApplicationEnvironment appEnv)
-        {  
-            _appEnv = appEnv;
-        }
-        
-        public void Initialize(RouteContext routeCtx)
+        public UmbracoContext(IApplicationEnvironment appEnv, IHttpContextAccessor httpContextAccessor)
         {
-            if (routeCtx == null || routeCtx.RouteData == null || routeCtx.RouteData.Values == null) return;
-            if (routeCtx.RouteData.Values.ContainsKey("_umbracoRoute") == false) return;
+            _appEnv = appEnv;
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        public void Initialize(RouteData routeData)
+        {
+            if (routeData?.Values == null) return;
+            if (routeData.Values.ContainsKey("_umbracoRoute") == false) return;
 
             if (Initialized) return;
 
-            _routeCtx = routeCtx;
+            _routeData = routeData;
 
-            RequestPath = _routeCtx.HttpContext.Request.Path;
-
+            RequestPath = _httpContextAccessor.HttpContext.Request.Path;
+            
             //This would be like looking up content in Umbraco
-            var path = _routeCtx.RouteData.Values["_umbracoRoute"] + ".txt";
+            var path = routeData.Values["_umbracoRoute"] + ".txt";
 
             var filePath = Path.Combine(_appEnv.ApplicationBasePath, "UmbracoContent", path);
 
@@ -46,12 +49,12 @@ namespace Umbraco.Web
                     {
                         ContractResolver = new CamelCasePropertyNamesContractResolver()
                     };
-                    Content = (Content)serializer.Deserialize(file, typeof(Content));
-                }                
+                    Content = (PublishedContent)serializer.Deserialize(file, typeof(PublishedContent));
+                }
             }
 
             //TODO: This name/etc. is temporary from old testing
-            AltTemplate = _routeCtx.HttpContext.Request.Query["altTemplate"];
+            AltTemplate = _httpContextAccessor.HttpContext.Request.Query["altTemplate"];
             if (string.IsNullOrEmpty(AltTemplate))
             {
                 AltTemplate = "Umbraco";
@@ -68,6 +71,7 @@ namespace Umbraco.Web
 
         public bool HasContent => Content != null;
 
-        public Content Content { get; set; }
+        public IPublishedContent Content { get; set; }
+        
     }
 }

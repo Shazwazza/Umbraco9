@@ -11,7 +11,9 @@ using Microsoft.AspNet.Mvc.Infrastructure;
 using Microsoft.Dnx.Runtime;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.OptionsModel;
+using Umbraco.Core;
 using Umbraco.Web.Controllers;
+using Umbraco.Web.Routing;
 
 namespace Umbraco.Web
 {
@@ -19,6 +21,8 @@ namespace Umbraco.Web
     {
         public static IServiceCollection AddUmbraco(this IServiceCollection services)
         {
+            services.AddUmbracoCore();
+
             services.Configure<MvcOptions>(options =>
             {
                 options.Conventions.Add(new SurfaceControllerConvention());
@@ -28,6 +32,8 @@ namespace Umbraco.Web
             //services.AddSingleton<UmbracoAssemblyProvider>();
             services.AddSingleton<IUmbracoConfig, UmbracoConfig>();
             services.AddScoped<UmbracoContext>();
+            services.AddScoped<RoutingContext>();
+            services.AddScoped<PublishedContentRequest>();
 
             return services;
         }

@@ -11,9 +11,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		NuGet.Config = NuGet.Config
 	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Umbraco.Web.UI", "src\Umbraco.Web.UI\Umbraco.Web.UI.xproj", "{60E1924D-7AF7-40E2-ACAE-894D330C8D42}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Umbraco.Web.UI", "Umbraco.Web.UI\Umbraco.Web.UI.xproj", "{60E1924D-7AF7-40E2-ACAE-894D330C8D42}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Umbraco.Web", "src\Umbraco.Web\Umbraco.Web.xproj", "{551DC97F-AC96-4B45-9D18-F3AE7256AD76}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Umbraco.Web", "Umbraco.Web\Umbraco.Web.xproj", "{551DC97F-AC96-4B45-9D18-F3AE7256AD76}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{972D2454-E239-46CC-9F8E-7D1D4F162A86}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Umbraco.Tests", "Umbraco.Tests\Umbraco.Tests.xproj", "{EFF32F2B-37BB-473D-867C-B70C3F503C61}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Umbraco.Core", "Umbraco.Core\Umbraco.Core.xproj", "{E049D910-C48A-4D96-8CC8-EB873A68ECDD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,6 +35,14 @@ Global
 		{551DC97F-AC96-4B45-9D18-F3AE7256AD76}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{551DC97F-AC96-4B45-9D18-F3AE7256AD76}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{551DC97F-AC96-4B45-9D18-F3AE7256AD76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFF32F2B-37BB-473D-867C-B70C3F503C61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFF32F2B-37BB-473D-867C-B70C3F503C61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFF32F2B-37BB-473D-867C-B70C3F503C61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFF32F2B-37BB-473D-867C-B70C3F503C61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E049D910-C48A-4D96-8CC8-EB873A68ECDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E049D910-C48A-4D96-8CC8-EB873A68ECDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E049D910-C48A-4D96-8CC8-EB873A68ECDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E049D910-C48A-4D96-8CC8-EB873A68ECDD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -36,5 +50,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{60E1924D-7AF7-40E2-ACAE-894D330C8D42} = {46C75A4E-3020-4549-BE8A-8190279BF37F}
 		{551DC97F-AC96-4B45-9D18-F3AE7256AD76} = {46C75A4E-3020-4549-BE8A-8190279BF37F}
+		{EFF32F2B-37BB-473D-867C-B70C3F503C61} = {972D2454-E239-46CC-9F8E-7D1D4F162A86}
+		{E049D910-C48A-4D96-8CC8-EB873A68ECDD} = {46C75A4E-3020-4549-BE8A-8190279BF37F}
 	EndGlobalSection
 EndGlobal
