@@ -4,7 +4,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Mvc.Rendering;
 using Microsoft.AspNet.Mvc.ViewFeatures;
+using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.WebEncoders;
+using Umbraco.Web.Routing;
 
 namespace Umbraco.Web
 {
@@ -68,7 +70,7 @@ namespace Umbraco.Web
             tagBuilder.WriteTo(htmlHelper.ViewContext.Writer, new HtmlEncoder());
 
             //new UmbracoForm:
-            var theForm = new UmbracoForm(htmlHelper.UrlEncoder, htmlHelper.ViewContext, surfaceController, surfaceAction, area, method, additionalRouteVals);
+            var theForm = new UmbracoForm(htmlHelper.UrlEncoder, htmlHelper.ViewContext, surfaceController, surfaceAction, area, additionalRouteVals);
             
             return theForm;
         }
@@ -86,7 +88,6 @@ namespace Umbraco.Web
             /// <param name="controllerName"></param>
             /// <param name="controllerAction"></param>
             /// <param name="area"></param>
-            /// <param name="method"></param>
             /// <param name="additionalRouteVals"></param>
             public UmbracoForm(
                 IUrlEncoder urlEncoder,
@@ -94,17 +95,15 @@ namespace Umbraco.Web
                 string controllerName,
                 string controllerAction,
                 string area,
-                FormMethod method,
                 object additionalRouteVals = null)
                 : base(viewContext)
             {
                 _viewContext = viewContext;
-                _method = method;
-                _encryptedString = CreateEncryptedRouteString(urlEncoder, controllerName, controllerAction, area, additionalRouteVals);
+                var surfaceFormHelper = viewContext.HttpContext.ApplicationServices.GetRequiredService<SurfaceFormHelper>();
+                _encryptedString = surfaceFormHelper.CreateEncryptedRouteString(urlEncoder, controllerName, controllerAction, area, additionalRouteVals);
             }
 
             private readonly ViewContext _viewContext;
-            private readonly FormMethod _method;
             private bool _disposed;
             private readonly string _encryptedString;
 
@@ -121,32 +120,7 @@ namespace Umbraco.Web
             }
         }
 
-        //TODO: Need to implement something similar
-        /// <summary>
-        /// This is used in methods like BeginUmbracoForm and SurfaceAction to generate an encrypted string which gets submitted in a request for which
-        /// Umbraco can decrypt during the routing process in order to delegate the request to a specific MVC Controller.
-        /// </summary>
-        /// <param name="urlEncoder"></param>
-        /// <param name="controllerName"></param>
-        /// <param name="controllerAction"></param>
-        /// <param name="area"></param>
-        /// <param name="additionalRouteVals"></param>
-        /// <returns></returns>
-        internal static string CreateEncryptedRouteString(IUrlEncoder urlEncoder, string controllerName, string controllerAction, string area, object additionalRouteVals = null)
-        {
-
-            //need to create a params string as Base64 to put into our hidden field to use during the routes
-            var surfaceRouteParams = $"c={urlEncoder.UrlEncode(controllerName)}&a={urlEncoder.UrlEncode(controllerAction)}&ar={area}";
-
-            var additionalRouteValsAsQuery = additionalRouteVals ?. ToDictionary<object>().ToQueryString(urlEncoder);
-
-            if (string.IsNullOrWhiteSpace(additionalRouteValsAsQuery) == false)
-                surfaceRouteParams += "&" + additionalRouteValsAsQuery;
-
-            //TODO: We need to encrypt! for now we'll base64 :(
-            //return surfaceRouteParams.EncryptWithMachineKey();
-
-            return Convert.ToBase64String(Encoding.UTF8.GetBytes(surfaceRouteParams));
-        }
+        
+        
     }
 }

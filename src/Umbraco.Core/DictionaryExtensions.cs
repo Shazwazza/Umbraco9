@@ -3,7 +3,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Framework.WebEncoders;
 
-namespace Umbraco.Web
+namespace Umbraco.Core
 {
     public static class DictionaryExtensions
     {

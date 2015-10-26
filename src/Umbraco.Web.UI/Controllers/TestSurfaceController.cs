@@ -2,21 +2,20 @@
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.ModelBinding;
 using Microsoft.Framework.Primitives;
+using Umbraco.Web.Controllers;
 
-namespace Umbraco.Web.Controllers
+namespace Umbraco.Controllers
 {
     public class TestSurfaceController : SurfaceController
     {
-
-        
         public IActionResult DoThis()
         {
-            this.ViewBag.something = "viewdata works";
+            this.ViewBag.warning = "This is a warning from view data!";
 
             ModelState.SetModelValue("test",
                 new ValueProviderResult(new StringValues(new [] { "YAY", "YAY" }), CultureInfo.CurrentCulture));
 
-            return new CrazyActionResult(ViewData);
+            return CurrentUmbracoPage();
         }
     }
 }

@@ -26,8 +26,6 @@ namespace Umbraco.Web
 
             services.Configure<MvcOptions>(options =>
             {
-                options.Conventions.Add(new SurfaceControllerConvention());             
-                
                 options.ModelBinders.Insert(0, new PublishedContentModelBinder());  
             });
 
@@ -35,6 +33,8 @@ namespace Umbraco.Web
             //services.AddSingleton<UmbracoAssemblyProvider>();
             services.AddSingleton<IUmbracoConfig, UmbracoConfig>();
             services.AddSingleton<UmbracoControllerTypeCollection>();
+            services.AddSingleton<SurfaceFormHelper>();
+            services.AddSingleton<IControllerPropertyActivator, ProxiedViewDataDictionaryPropertyActivator>();
 
             services.AddScoped<UmbracoContext>();
             services.AddScoped<RoutingContext>();

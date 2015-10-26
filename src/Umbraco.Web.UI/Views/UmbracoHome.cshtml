@@ -12,13 +12,21 @@
 
     <p>Hello world, I'm an Umbraco document</p>
 
+    @if (ViewBag.warning != null)
+    {
+        <div class="alert alert-warning">
+            @ViewBag.warning
+        </div>
+     }
+
     <div>
-        @using(Html.BeginUmbracoForm(UmbracoContext, "DoThis", "TestSurface"))
+        @using (Html.BeginUmbracoForm(UmbracoContext, "DoThis", "TestSurface"))
         {
-            <label for="name"></label>
-            <input type="text" name="name" id="name" />
-            <br />
-            <button type="submit">Submit</button>
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" name="name" id="name" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-default">Submit</button>
         }        
     </div>
 </section>

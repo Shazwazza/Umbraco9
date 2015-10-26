@@ -3,6 +3,7 @@ using Microsoft.AspNet.Routing;
 using Microsoft.Framework.DependencyInjection;
 using Umbraco.Core;
 using Umbraco.Web.Controllers;
+using Umbraco.Web.Models;
 
 namespace Umbraco.Web.Routing
 {
@@ -33,22 +34,36 @@ namespace Umbraco.Web.Routing
             // calling it.
             var newRouteData = new RouteData(oldRouteData);
             newRouteData.Routers.Add(_next);
-            
+
             //It's an umbraco route, need to find out if it matches any content
             if (newRouteData.Values.ContainsKey("_umbracoRoute"))
             {
                 var umbCtx = context.HttpContext.RequestServices.GetRequiredService<UmbracoContext>();
+                var umbControllerTypes = context.HttpContext.ApplicationServices.GetRequiredService<UmbracoControllerTypeCollection>();
                 var pcr = context.HttpContext.RequestServices.GetRequiredService<PublishedContentRequest>();
+                
                 if (await RouteUmbracoContentAsync(umbCtx, pcr, newRouteData))
                 {
-                    var umbControllerTypes = context.HttpContext.ApplicationServices.GetRequiredService<UmbracoControllerTypeCollection>();
-                    SetUmbracoRouteValues(umbCtx, umbControllerTypes, newRouteData);
+                    var routeDef = GetUmbracoRouteValues(umbCtx, umbControllerTypes);
+                    newRouteData.DataTokens["umbraco-route-def"] = routeDef;
+                    var surfaceFormHelper = context.HttpContext.ApplicationServices.GetRequiredService<SurfaceFormHelper>();
+                    var formInfo = surfaceFormHelper.GetFormInfo(context);
+                    if (formInfo != null)
+                    {
+                        //there is form data, route to the surface controller
+                        SetUmbracoRouteValues(formInfo, newRouteData);
+                    }
+                    else
+                    {
+                        //there is no form data, route normally
+                        SetUmbracoRouteValues(routeDef, newRouteData);
+                    }
                 }
-            }
-            
+            }            
+
             await ExecuteNext(context, newRouteData, oldRouteData);
         }
-
+       
         private async Task<bool> RouteUmbracoContentAsync(UmbracoContext umbCtx, PublishedContentRequest pcr, RouteData routeData)
         {
             //Initialize the context, this will be called a few times but the initialize logic
@@ -70,23 +85,31 @@ namespace Umbraco.Web.Routing
             return umbCtx.HasContent;            
         }
 
-        private void SetUmbracoRouteValues(UmbracoContext umbCtx, UmbracoControllerTypeCollection umbControllerTypes, RouteData newRouteData)
+        private RouteDefinition GetUmbracoRouteValues(UmbracoContext umbCtx, UmbracoControllerTypeCollection umbControllerTypes)
         {
             //Let's match controller names:        
             var found = umbControllerTypes.GetControllerName(umbCtx.PublishedContent.ContentType);
             //check if there are actually any controllers that match the content type
             if (found.IsNullOrWhiteSpace() == false)
             {
-                newRouteData.Values["controller"] = found;
-                //Set the a matching 
-                newRouteData.Values["action"] = umbControllerTypes.GetControllerActionName(found, umbCtx.PublishedContentRequest.TemplateAlias);
+                return new RouteDefinition()
+                {
+                    ControllerName = found,
+                    ActionName = umbControllerTypes.GetControllerActionName(found, umbCtx.PublishedContentRequest.TemplateAlias)
+                };
             }
-            else
+            //There is no controller type registered for this content type, so we'll match if this is the default
+            return new RouteDefinition()
             {
-                //There is no controller type registered for this content type, so we'll match if this is the default
-                newRouteData.Values["controller"] = "Umbraco";
-                newRouteData.Values["action"] = "Index";
-            }
+                ControllerName = "Umbraco",
+                ActionName = "Index"
+            };
+        }
+
+        private void SetUmbracoRouteValues(RouteDefinition routeDef, RouteData routeData)
+        {
+            routeData.Values["controller"] = routeDef.ControllerName;
+            routeData.Values["action"] = routeDef.ActionName;
         }
 
         private async Task ExecuteNext(RouteContext context, RouteData newRouteData, RouteData oldRouteData)

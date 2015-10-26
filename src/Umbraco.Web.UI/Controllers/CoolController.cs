@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNet.Mvc;
+using Umbraco.Web;
+using Umbraco.Web.Controllers;
 using Umbraco.Web.Models;
 
-namespace Umbraco.Web.Controllers
+namespace Umbraco.Controllers
 {
     public class CoolController : UmbracoController
     {

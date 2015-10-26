@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 
-namespace Umbraco.Web
+namespace Umbraco.Core
 {
     public static class ObjectExtensions
     {
@@ -12,7 +12,7 @@ namespace Umbraco.Web
         /// <param name="o"></param>
         /// <param name="ignoreProperties">Properties to ignore</param>
         /// <returns></returns>
-        internal static IDictionary<string, TVal> ToDictionary<TVal>(this object o, params string[] ignoreProperties)
+        public static IDictionary<string, TVal> ToDictionary<TVal>(this object o, params string[] ignoreProperties)
         {
             if (o != null)
             {
