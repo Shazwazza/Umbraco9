@@ -7,7 +7,6 @@ namespace Umbraco.Web.Models
         Guid Id { get; set; }
         string ContentType { get; set; }
         string Name { get; set; }
-        string View { get; set; }
         Guid TemplateId { get; set; }
     }
 }

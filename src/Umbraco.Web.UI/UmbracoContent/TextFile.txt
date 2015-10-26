@@ -1,5 +1,5 @@
 ﻿{
-	name: "Home page",
-	view: "UmbracoHome",
-	contentType: "Home"
+	name: "Home page",	
+	contentType: "Home",
+	templateId: "33FDCCA6-F563-4686-BA3D-1BFC4575ED21"
 }

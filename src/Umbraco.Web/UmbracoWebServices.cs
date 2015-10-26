@@ -10,6 +10,7 @@ using Microsoft.AspNet.Mvc.Controllers;
 using Microsoft.AspNet.Mvc.Infrastructure;
 using Microsoft.Dnx.Runtime;
 using Microsoft.Framework.DependencyInjection;
+using Microsoft.Framework.DependencyInjection.Extensions;
 using Microsoft.Framework.OptionsModel;
 using Umbraco.Core;
 using Umbraco.Web.Controllers;
@@ -17,7 +18,7 @@ using Umbraco.Web.Routing;
 
 namespace Umbraco.Web
 {
-    public static class UmbracoStartup
+    public static class UmbracoWebServices
     {
         public static IServiceCollection AddUmbraco(this IServiceCollection services)
         {
@@ -25,33 +26,40 @@ namespace Umbraco.Web
 
             services.Configure<MvcOptions>(options =>
             {
-                options.Conventions.Add(new SurfaceControllerConvention());
+                options.Conventions.Add(new SurfaceControllerConvention());             
+                
+                options.ModelBinders.Insert(0, new PublishedContentModelBinder());  
             });
 
             services.AddSingleton<IControllerActivator, UmbracoControllerActivator>();
             //services.AddSingleton<UmbracoAssemblyProvider>();
             services.AddSingleton<IUmbracoConfig, UmbracoConfig>();
+            services.AddSingleton<UmbracoControllerTypeCollection>();
+
             services.AddScoped<UmbracoContext>();
             services.AddScoped<RoutingContext>();
-            services.AddScoped<PublishedContentRequest>();
+            services.AddScoped<PublishedContentRequest>();            
+            services.AddScoped<IContentFinder, PathContentFinder>();
+            //TODO: default is no last chance finder (for now)
+            services.AddScoped<ILastChanceContentFinder>(provider => (ILastChanceContentFinder) null);
+            services.AddScoped<UrlProvider>(provider => new UrlProvider(
+                provider.GetRequiredService<UmbracoContext>(),
+                provider.GetServices<IUrlProvider>(),
+                UrlProviderMode.Auto));            
+            services.AddScoped<IUrlProvider, DefaultUrlProvider>();
 
             return services;
         }
 
         public static void UseUmbraco(this IApplicationBuilder app)
         {
-            //app.UseMvc();
-            //app.UseMvc(routes =>
-            //{
-            //    //routes.MapRoute("Default", "{controller=Home}/{action=Index}/{id?}");
-
-            //    //routes.MapRoute("Umbraco",
-            //    //    //catch all
-            //    //    "{*_umbracoRoute:Required}",
-            //    //    //route constraint value
-            //    //    new { umbraco = "yes", action = "Index" }
-            //    //    );
-            //});
+            app.UseMvc(routes =>
+            {
+                //Creates the Umbraco catch all route with the Umbraco router
+                routes.DefaultHandler = new UmbracoRouter(routes.DefaultHandler);
+                routes.MapRoute("Umbraco", "{*_umbracoRoute:Required}");
+                routes.MapRoute("UmbracoSurface", "{*_surfaceRoute:Required}");
+            });
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNet.Mvc;
+using Umbraco.Web.Models;
 
 namespace Umbraco.Web.Controllers
 {
@@ -8,9 +9,9 @@ namespace Umbraco.Web.Controllers
         {
         }
 
-        public override ActionResult Index(string path)
+        public override ActionResult Index(IPublishedContent publishedContent)
         {
-            return Content("THIS IS SO COOL " + path);
+            return Content("THIS IS SO COOL");
         }
 
        

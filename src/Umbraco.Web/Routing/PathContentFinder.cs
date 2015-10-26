@@ -14,18 +14,17 @@ namespace Umbraco.Web.Routing
 {
     public class PathContentFinder : IContentFinder
     {
-        private readonly PublishedContentRequest _pcr;
         private readonly IApplicationEnvironment _appEnv;
 
-        public PathContentFinder(PublishedContentRequest pcr, IApplicationEnvironment appEnv)
+        public PathContentFinder(IApplicationEnvironment appEnv)
         {
-            _pcr = pcr;
+            //_pcr = pcr;
             _appEnv = appEnv;
         }
 
-        public Task<bool> TryFindContentAsync(RouteData routeData)
+        public Task<bool> TryFindContentAsync(PublishedContentRequest pcr)
         {
-            var path = routeData.Values["_umbracoRoute"] + ".txt";
+            var path = pcr.RouteData.Values["_umbracoRoute"] + ".txt";
 
             var filePath = Path.Combine(_appEnv.ApplicationBasePath, "UmbracoContent", path);
 
@@ -39,7 +38,7 @@ namespace Umbraco.Web.Routing
                     };
 
                     var content = (PublishedContent) serializer.Deserialize(file, typeof (PublishedContent));
-                    _pcr.PublishedContent = content;
+                    pcr.PublishedContent = content;
 
                     return Task.FromResult(true);
                 }

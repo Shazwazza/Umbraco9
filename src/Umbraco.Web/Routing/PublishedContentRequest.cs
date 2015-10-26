@@ -44,8 +44,10 @@ namespace Umbraco.Web.Routing
         {            
             if (routingContext == null) throw new ArgumentNullException("routingContext");
             if (templateService == null) throw new ArgumentNullException(nameof(templateService));
+            if (loggerFactor == null) throw new ArgumentNullException(nameof(loggerFactor));
+            if (httpContextAccessor == null) throw new ArgumentNullException(nameof(httpContextAccessor));
 
-            _templateService = templateService;
+            _templateService = templateService; 
             RoutingContext = routingContext;
 
             _engine = new PublishedContentRequestEngine(templateService, this, loggerFactor, httpContextAccessor);
@@ -54,24 +56,28 @@ namespace Umbraco.Web.Routing
         /// <summary>
         /// Gets the engine associated to the request.
         /// </summary>
-        internal PublishedContentRequestEngine Engine { get { return _engine; } }
+        internal PublishedContentRequestEngine Engine => _engine;
 
         /// <summary>
         /// Prepares the request.
         /// </summary>
-        public async Task PrepareAsync(RouteData routeData)
+        public async Task<bool> PrepareAsync(RouteData routeData)
         {
-            await _engine.PrepareRequestAsync(routeData);
+            RouteData = routeData;
+            var result = await _engine.PrepareRequestAsync();
+            return result;
         }
+
+        public bool IsPrepared => RouteData != null;
 
         /// <summary>
         /// Updates the request when there is no template to render the content.
         /// </summary>
-        internal async Task UpdateOnMissingTemplateAsync(RouteData routeData)
+        internal async Task UpdateOnMissingTemplateAsync()
         {
             var __readonly = _readonly;
             _readonly = false;
-            await _engine.UpdateRequestOnMissingTemplateAsync(routeData);
+            await _engine.UpdateRequestOnMissingTemplateAsync();
             _readonly = __readonly;
         }
 
@@ -108,12 +114,7 @@ namespace Umbraco.Web.Routing
         /// </summary>
         private IPublishedContent _publishedContent;
 
-        /// <summary>
-        /// The initial requested IPublishedContent, if any, else <c>null</c>.
-        /// </summary>
-        /// <remarks>The initial requested content is the content that was found by the finders,
-        /// before anything such as 404, redirect... took place.</remarks>
-        private IPublishedContent _initialPublishedContent;
+        public RouteData RouteData { get; private set; }
 
         /// <summary>
         /// Gets or sets the requested content.
@@ -158,7 +159,7 @@ namespace Umbraco.Web.Routing
             // else
 
             // save
-            var template = _template;
+            var template = TemplateModel;
 
             // set published content - this resets the template, and sets IsInternalRedirect to false
             PublishedContent = content;
@@ -168,7 +169,7 @@ namespace Umbraco.Web.Routing
             if (isInternalRedirect)
             {
                 // restore
-                _template = template;
+                TemplateModel = template;
             }
         }
 
@@ -177,18 +178,12 @@ namespace Umbraco.Web.Routing
 		/// </summary>
 		/// <remarks>The initial requested content is the content that was found by the finders,
 		/// before anything such as 404, redirect... took place.</remarks>
-		public IPublishedContent InitialPublishedContent { get { return _initialPublishedContent; } }
+		public IPublishedContent InitialPublishedContent { get; private set; }
 
         /// <summary>
         /// Gets value indicating whether the current published content is the initial one.
         /// </summary>
-        public bool IsInitialPublishedContent
-        {
-            get
-            {
-                return _initialPublishedContent != null && _initialPublishedContent == _publishedContent;
-            }
-        }
+        public bool IsInitialPublishedContent => InitialPublishedContent != null && InitialPublishedContent == _publishedContent;
 
         /// <summary>
         /// Indicates that the current PublishedContent is the initial one.
@@ -198,7 +193,7 @@ namespace Umbraco.Web.Routing
             EnsureWriteable();
 
             // note: it can very well be null if the initial content was not found
-            _initialPublishedContent = _publishedContent;
+            InitialPublishedContent = _publishedContent;
             IsInternalRedirectPublishedContent = false;
         }
 
@@ -213,46 +208,21 @@ namespace Umbraco.Web.Routing
         /// <summary>
         /// Gets a value indicating whether the content request has a content.
         /// </summary>
-        public bool HasPublishedContent
-        {
-            get { return PublishedContent != null; }
-        }
+        public bool HasPublishedContent => PublishedContent != null;
 
         #endregion
 
         #region Template
 
         /// <summary>
-        /// The template model, if any, else <c>null</c>.
-        /// </summary>
-        private ITemplate _template;
-
-        /// <summary>
         /// Gets or sets the template model to use to display the requested content.
         /// </summary>
-        internal ITemplate TemplateModel
-        {
-            get
-            {
-                return _template;
-            }
-
-            set
-            {
-                _template = value;
-            }
-        }
+        internal ITemplate TemplateModel { get; private set; }
 
         /// <summary>
         /// Gets the alias of the template to use to display the requested content.
         /// </summary>
-        public string TemplateAlias
-        {
-            get
-            {
-                return _template == null ? null : _template.Alias;
-            }
-        }
+        public string TemplateAlias => TemplateModel?.Alias;
 
         /// <summary>
         /// Tries to set the template to use to display the requested content.
@@ -308,10 +278,7 @@ namespace Umbraco.Web.Routing
         /// <summary>
         /// Gets a value indicating whether the content request has a template.
         /// </summary>
-        public bool HasTemplate
-        {
-            get { return _template != null; }
-        }
+        public bool HasTemplate => TemplateModel != null;
 
         #endregion
 

@@ -7,6 +7,6 @@ namespace Umbraco.Web.Routing
 {
     public interface IContentFinder
     {
-        Task<bool> TryFindContentAsync(RouteData routeData);
+        Task<bool> TryFindContentAsync(PublishedContentRequest pcr);
     }
 }

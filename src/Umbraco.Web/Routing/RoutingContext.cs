@@ -10,7 +10,7 @@ namespace Umbraco.Web.Routing
     {
         private readonly Lazy<UrlProvider> _urlProvider;
         private readonly Lazy<IEnumerable<IContentFinder>> _publishedContentFinders;
-        private readonly Lazy<IContentFinder> _publishedContentLastChanceFinder;
+        private readonly Lazy<ILastChanceContentFinder> _publishedContentLastChanceFinder;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RoutingContext"/> class.
@@ -18,26 +18,26 @@ namespace Umbraco.Web.Routing
         /// <param name="contentFinders">The document lookups resolver.</param>
         /// <param name="contentLastChanceFinder"> </param>
         /// <param name="urlProvider">The nice urls provider.</param>
-        internal RoutingContext(
+        public RoutingContext(
             IEnumerable<IContentFinder> contentFinders,
-            IContentFinder contentLastChanceFinder,
+            ILastChanceContentFinder contentLastChanceFinder,
             UrlProvider urlProvider)
         {
             _publishedContentFinders = new Lazy<IEnumerable<IContentFinder>>(() => contentFinders, false);
-            _publishedContentLastChanceFinder = new Lazy<IContentFinder>(() => contentLastChanceFinder, false);
+            _publishedContentLastChanceFinder = new Lazy<ILastChanceContentFinder>(() => contentLastChanceFinder, false);
             _urlProvider = new Lazy<UrlProvider>(() => urlProvider, false);
         }
 
-        internal RoutingContext(
-            UmbracoContext umbracoContext,
-            Lazy<IEnumerable<IContentFinder>> contentFinders,
-            Lazy<IContentFinder> contentLastChanceFinder,
-            Lazy<UrlProvider> urlProvider)
-        {
-            _publishedContentFinders = contentFinders;
-            _publishedContentLastChanceFinder = contentLastChanceFinder;
-            _urlProvider = urlProvider;
-        }
+        //internal RoutingContext(
+        //    UmbracoContext umbracoContext,
+        //    Lazy<IEnumerable<IContentFinder>> contentFinders,
+        //    Lazy<ILastChanceContentFinder> contentLastChanceFinder,
+        //    Lazy<UrlProvider> urlProvider)
+        //{
+        //    _publishedContentFinders = contentFinders;
+        //    _publishedContentLastChanceFinder = contentLastChanceFinder;
+        //    _urlProvider = urlProvider;
+        //}
 
         /// <summary>
         /// Gets the published content finders.

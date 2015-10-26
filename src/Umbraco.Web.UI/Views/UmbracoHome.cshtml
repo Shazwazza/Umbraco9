@@ -13,7 +13,7 @@
     <p>Hello world, I'm an Umbraco document</p>
 
     <div>
-        @using(Html.BeginUmbracoForm(UmbracoContext, "", ""))
+        @using(Html.BeginUmbracoForm(UmbracoContext, "DoThis", "TestSurface"))
         {
             <label for="name"></label>
             <input type="text" name="name" id="name" />

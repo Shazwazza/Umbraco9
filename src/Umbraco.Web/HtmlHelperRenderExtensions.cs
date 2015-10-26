@@ -47,7 +47,10 @@ namespace Umbraco.Web
                                           string area,
                                           object additionalRouteVals = null)
         {
-
+            if (htmlAttributes == null)
+            {
+                htmlAttributes = new Dictionary<string, object>();
+            }
             //ensure that the multipart/form-data is added to the html attributes
             if (htmlAttributes.ContainsKey("enctype") == false)
             {
@@ -62,7 +65,7 @@ namespace Umbraco.Web
             tagBuilder.MergeAttribute("method", HtmlHelper.GetFormMethodString(method), true);
             
             tagBuilder.TagRenderMode = TagRenderMode.StartTag;
-            htmlHelper.ViewContext.Writer.Write(tagBuilder.ToString());
+            tagBuilder.WriteTo(htmlHelper.ViewContext.Writer, new HtmlEncoder());
 
             //new UmbracoForm:
             var theForm = new UmbracoForm(htmlHelper.UrlEncoder, htmlHelper.ViewContext, surfaceController, surfaceAction, area, method, additionalRouteVals);

@@ -11,7 +11,7 @@ namespace Umbraco.Core
     {
         public static IServiceCollection AddUmbracoCore(this IServiceCollection services)
         {
-            services.AddSingleton<ITemplateService, TemplateService>();
+            services.AddSingleton<ITemplateService, TestTemplateService>();
             return services;
         }
     }

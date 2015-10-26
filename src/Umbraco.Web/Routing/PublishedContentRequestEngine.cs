@@ -35,14 +35,14 @@ namespace Umbraco.Web.Routing
         {
             if (templateService == null) throw new ArgumentNullException(nameof(templateService));
             if (pcr == null) throw new ArgumentException("pcr is null.");
-
+            if (loggerFactory == null) throw new ArgumentNullException(nameof(loggerFactory));
+            if (httpContextAccessor == null) throw new ArgumentNullException(nameof(httpContextAccessor));
 
             _templateService = templateService;
             _pcr = pcr;
             _httpContextAccessor = httpContextAccessor;
             _logger = loggerFactory.CreateLogger(typeof(PublishedContentRequestEngine).FullName);
             _routingContext = pcr.RoutingContext;
-            if (_routingContext == null) throw new ArgumentException("pcr.RoutingContext is null.");
 
             //var umbracoContext = _routingContext.UmbracoContext;
             //if (umbracoContext == null) throw new ArgumentException("pcr.RoutingContext.UmbracoContext is null.");
@@ -59,14 +59,16 @@ namespace Umbraco.Web.Routing
         /// <returns>
         /// Returns false if the request was not successfully prepared
         /// </returns>
-        public async Task<bool> PrepareRequestAsync(RouteData routeData)
+        public async Task<bool> PrepareRequestAsync()
         {
+            if (_pcr.RouteData == null) return false;
+
             // note - at that point the original legacy module did something do handle IIS custom 404 errors
             //   ie pages looking like /anything.aspx?404;/path/to/document - I guess the reason was to support
             //   "directory urls" without having to do wildcard mapping to ASP.NET on old IIS. This is a pain
             //   to maintain and probably not used anymore - removed as of 06/2012. @zpqrtbnk.
             //
-            //   to trigger Umbraco's not-found, one should configure IIS and/or ASP.NET custom 404 errors
+            //   to trigger Umbraco's not-found, one should configure IIS and/or ASP.NET cusom 404 errors
             //   so that they point to a non-existing page eg /redirect-404.aspx
             //   TODO: SD: We need more information on this for when we release 4.10.0 as I'm not sure what this means.
 
@@ -81,22 +83,28 @@ namespace Umbraco.Web.Routing
             }
 
             // set the culture on the thread - once, so it's set when running document lookups
-            Thread.CurrentThread.CurrentUICulture = Thread.CurrentThread.CurrentCulture = _pcr.Culture;
+            if (_pcr.Culture != null)
+            {
+                Thread.CurrentThread.CurrentUICulture = Thread.CurrentThread.CurrentCulture = _pcr.Culture;
+            }
 
             //find the published content if it's not assigned. This could be manually assigned with a custom route handler, or
             // with something like EnsurePublishedContentRequestAttribute or UmbracoVirtualNodeRouteHandler. Those in turn call this method
             // to setup the rest of the pipeline but we don't want to run the finders since there's one assigned.
-            if (_pcr.PublishedContent == null)
+            if (_pcr.PublishedContent == null && _pcr.RouteData.Values.ContainsKey("_umbracoRoute"))
             {
                 // find the document & template
-                await FindPublishedContentAndTemplateAsync(routeData);
+                await FindPublishedContentAndTemplateAsync();
             }
 
             // handle wildcard domains
             //HandleWildcardDomains();
 
             // set the culture on the thread -- again, 'cos it might have changed due to a finder or wildcard domain
-            Thread.CurrentThread.CurrentUICulture = Thread.CurrentThread.CurrentCulture = _pcr.Culture;
+            if (_pcr.Culture != null)
+            {
+                Thread.CurrentThread.CurrentUICulture = Thread.CurrentThread.CurrentCulture = _pcr.Culture;
+            }
 
             // trigger the Prepared event - at that point it is still possible to change about anything
             // even though the request might be flagged for redirection - we'll redirect _after_ the event
@@ -131,7 +139,10 @@ namespace Umbraco.Web.Routing
             }
 
             // set the culture on the thread -- again, 'cos it might have changed in the event handler
-            Thread.CurrentThread.CurrentUICulture = Thread.CurrentThread.CurrentCulture = _pcr.Culture;
+            if (_pcr.Culture != null)
+            {
+                Thread.CurrentThread.CurrentUICulture = Thread.CurrentThread.CurrentCulture = _pcr.Culture;
+            }
 
             // if request has been flagged to redirect, or has no content to display,
             // then return - whoever called us is in charge of actually redirecting
@@ -159,14 +170,14 @@ namespace Umbraco.Web.Routing
         /// Updates the request when there is no template to render the content.
         /// </summary>
         /// <remarks>This is called from Mvc when there's a document to render but no template.</remarks>
-        public async Task UpdateRequestOnMissingTemplateAsync(RouteData routeData)
+        public async Task UpdateRequestOnMissingTemplateAsync()
         {
             // clear content
             var content = _pcr.PublishedContent;
             _pcr.PublishedContent = null;
 
-            await HandlePublishedContentAsync(routeData); // will go 404
-            FindTemplate(_httpContextAccessor.HttpContext.Request);
+            await HandlePublishedContentAsync(); // will go 404
+            FindTemplate();
 
             // if request has been flagged to redirect then return
             // whoever called us is in charge of redirecting
@@ -280,10 +291,10 @@ namespace Umbraco.Web.Routing
         /// Finds the Umbraco document (if any) matching the request, and updates the PublishedContentRequest accordingly.
         /// </summary>
         /// <returns>A value indicating whether a document and template were found.</returns>
-        private async Task FindPublishedContentAndTemplateAsync(RouteData routeData)
+        private async Task FindPublishedContentAndTemplateAsync()
         {
             // run the document finders
-            await FindPublishedContentAsync(routeData);
+            await FindPublishedContentAsync();
 
             // if request has been flagged to redirect then return
             // whoever called us is in charge of actually redirecting
@@ -295,10 +306,10 @@ namespace Umbraco.Web.Routing
             // so internal redirect, 404, etc has precedence over redirect
 
             // handle not-found, redirects, access...
-            await HandlePublishedContentAsync(routeData);
+            await HandlePublishedContentAsync();
 
             // find a template
-            FindTemplate(_httpContextAccessor.HttpContext.Request);
+            FindTemplate();
 
             //// handle umbracoRedirect
             //FollowExternalRedirect();
@@ -308,7 +319,7 @@ namespace Umbraco.Web.Routing
         /// Tries to find the document matching the request, by running the IPublishedContentFinder instances.
         /// </summary>
         /// <exception cref="InvalidOperationException">There is no finder collection.</exception>
-        internal async Task FindPublishedContentAsync(RouteData routeData)
+        internal async Task FindPublishedContentAsync()
         {
             //const string tracePrefix = "FindPublishedContent: ";
 
@@ -322,7 +333,7 @@ namespace Umbraco.Web.Routing
             //iterate but return on first one that finds it
             foreach (var publishedContentFinder in _routingContext.PublishedContentFinders)
             {
-                if (await publishedContentFinder.TryFindContentAsync(routeData))
+                if (await publishedContentFinder.TryFindContentAsync(_pcr))
                 {
                     break;
                 }
@@ -340,7 +351,7 @@ namespace Umbraco.Web.Routing
         /// Handles "not found", internal redirects, access validation...
         /// things that must be handled in one place because they can create loops
         /// </remarks>
-        private async Task HandlePublishedContentAsync(RouteData routeData)
+        private async Task HandlePublishedContentAsync()
         {
             const string tracePrefix = "HandlePublishedContent: ";
 
@@ -359,7 +370,7 @@ namespace Umbraco.Web.Routing
 
                     // if it fails then give up, there isn't much more that we can do
                     var lastChance = _routingContext.PublishedContentLastChanceFinder;
-                    if (lastChance == null || await lastChance.TryFindContentAsync(routeData) == false)
+                    if (lastChance == null || await lastChance.TryFindContentAsync(_pcr) == false)
                     {
                         _logger.LogDebug("{0}Failed to find a document, give up", tracePrefix);
                         break;
@@ -503,7 +514,7 @@ namespace Umbraco.Web.Routing
         /// <summary>
         /// Finds a template for the current node, if any.
         /// </summary>
-        private void FindTemplate(HttpRequest httpRequest)
+        private void FindTemplate()
         {
             // NOTE: at the moment there is only 1 way to find a template, and then ppl must
             // use the Prepared event to change the template if they wish. Should we also
@@ -513,11 +524,11 @@ namespace Umbraco.Web.Routing
 
             if (_pcr.PublishedContent == null)
             {
-                _pcr.TemplateModel = null;
+                _pcr.ResetTemplate();
                 return;
             }
 
-            // read the alternate template alias, from querystring, form, cookie or server vars,
+            // read the alternate template alias from querystring
             // only if the published content is the initial once, else the alternate template
             // does not apply
             // + optionnally, apply the alternate template on internal redirects
@@ -525,9 +536,7 @@ namespace Umbraco.Web.Routing
             string altTemplate = null;
             if (useAltTemplate)
             {
-                altTemplate = _httpContextAccessor.HttpContext.Request.Query["altTemplate"];
-                if (string.IsNullOrWhiteSpace(altTemplate))
-                    altTemplate = _httpContextAccessor.HttpContext.Request.Form["altTemplate"];
+                altTemplate = _httpContextAccessor.HttpContext.Request.Query["altTemplate"];               
             }
 
             if (string.IsNullOrWhiteSpace(altTemplate))
@@ -550,7 +559,7 @@ namespace Umbraco.Web.Routing
                     var template = _templateService.GetTemplate(templateId);
                     if (template == null)
                         throw new InvalidOperationException("The template with Id " + templateId + " does not exist, the page cannot render");
-                    _pcr.TemplateModel = template;
+                    _pcr.SetTemplate(template);
                     _logger.LogDebug("{0}Got template id={1} alias=\"{2}\"", tracePrefix, template.Id, template.Alias);
                 }
                 else
@@ -573,7 +582,7 @@ namespace Umbraco.Web.Routing
                 var template = _templateService.GetTemplate(altTemplate);
                 if (template != null)
                 {
-                    _pcr.TemplateModel = template;
+                    _pcr.SetTemplate(template);
                     _logger.LogDebug("{0}Got template id={1} alias=\"{2}\"", tracePrefix, template.Id, template.Alias);
                 }
                 else

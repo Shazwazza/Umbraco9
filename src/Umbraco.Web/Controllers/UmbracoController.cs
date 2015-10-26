@@ -2,6 +2,8 @@
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.ActionConstraints;
 using Microsoft.AspNet.Mvc.Filters;
+using Umbraco.Web.Models;
+using Umbraco.Web.Routing;
 
 namespace Umbraco.Web.Controllers
 {
@@ -21,8 +23,7 @@ namespace Umbraco.Web.Controllers
     /// The default Umbraco rendering controller (i.e. previously RenderMvcController)
     /// </summary>
     //[UmbracoRouteConstraint]
-    [UmbracoActionConstraint]
-    [Route("{*_umbracoRoute:Required}")]
+    //[UmbracoActionConstraint]
     public class UmbracoController : Controller
     {
         private readonly UmbracoContext _umbraco;
@@ -31,9 +32,8 @@ namespace Umbraco.Web.Controllers
         {
             _umbraco = umbraco;
         }
-
-        //TODO: need to model bind the 'Content' item
-        public virtual ActionResult Index(string path)
+                
+        public virtual ActionResult Index(IPublishedContent publishedContent)
         {
             //if (this.ViewBag.something != "viewdata works")
             //{
@@ -42,18 +42,18 @@ namespace Umbraco.Web.Controllers
 
             //return this.ModelState["test"].RawValue.ToString();
 
-            if (_umbraco.Content == null)
+            if (_umbraco.PublishedContent == null)
             {
                 throw new Exception("No content");
             }
 
-            //TODO: Need view engine
-            return View("~/Views/" + _umbraco.Content.View + ".cshtml", _umbraco.Content);
+            return UmbracoViewForRoute(publishedContent);
         }
 
-        public override void OnActionExecuting(ActionExecutingContext context)
+        protected ActionResult UmbracoViewForRoute(IPublishedContent publishedContent)
         {
-            base.OnActionExecuting(context);
+            //TODO: Need view engine
+            return View("~/Views/" + _umbraco.PublishedContentRequest.TemplateAlias + ".cshtml", _umbraco.PublishedContent);
         }
     }
 

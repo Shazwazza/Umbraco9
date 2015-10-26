@@ -1,18 +1,17 @@
 ﻿using System;
-using Microsoft.AspNet.Hosting;
 using Microsoft.AspNet.Mvc.ActionConstraints;
-using Microsoft.Dnx.Runtime;
 using Microsoft.Framework.DependencyInjection;
 
-namespace Umbraco.Web.Controllers
+namespace Umbraco.Web.Routing
 {
     public class SurfaceActionConstraintAttribute : Attribute, IActionConstraintFactory
     {
         
         public IActionConstraint CreateInstance(IServiceProvider services)
         {
-            var umbCtx = services.GetRequiredService<UmbracoContext>();            
-            return new SurfaceActionConstraint(umbCtx);
+            var umbCtx = services.GetRequiredService<UmbracoContext>();
+            var pcr = services.GetRequiredService<PublishedContentRequest>();
+            return new SurfaceActionConstraint(umbCtx, pcr);
         }
     }
 }

@@ -9,23 +9,7 @@ namespace Umbraco.Web.Routing
     /// </summary>
     public class UrlProvider
     {
-        #region Ctor and configuration
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UrlProvider"/> class with an Umbraco context and a list of url providers.
-        /// </summary>
-        /// <param name="umbracoContext">The Umbraco context.</param>
-        /// <param name="urlProviders">The list of url providers.</param>
-        public UrlProvider(UmbracoContext umbracoContext, IEnumerable<IUrlProvider> urlProviders)
-        {
-            if (umbracoContext == null) throw new ArgumentNullException("umbracoContext");
-
-            _umbracoContext = umbracoContext;
-            _urlProviders = urlProviders;
-
-            var provider = UrlProviderMode.Auto;
-            Mode = provider;
-        }
+        #region Ctor and configuration      
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UrlProvider"/> class with an Umbraco context and a list of url providers.
@@ -132,7 +116,7 @@ namespace Umbraco.Web.Routing
         /// </remarks>
         public string GetUrl(Guid id, Uri current, UrlProviderMode mode)
         {
-            var url = _urlProviders.Select(provider => provider.GetUrl(_umbracoContext, id, current, mode))
+            var url = _urlProviders.Select(provider => provider.GetUrl(id, current, mode))
                 .FirstOrDefault(u => u != null);
             return url ?? "#"; // legacy wants this
         }
@@ -169,7 +153,7 @@ namespace Umbraco.Web.Routing
         public IEnumerable<string> GetOtherUrls(Guid id, Uri current)
         {
             // providers can return null or an empty list or a non-empty list, be prepared
-            var urls = _urlProviders.SelectMany(provider => provider.GetOtherUrls(_umbracoContext, id, current) ?? Enumerable.Empty<string>());
+            var urls = _urlProviders.SelectMany(provider => provider.GetOtherUrls(id, current) ?? Enumerable.Empty<string>());
 
             return urls;
         }

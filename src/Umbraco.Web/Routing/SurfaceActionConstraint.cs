@@ -1,15 +1,17 @@
 ﻿using Microsoft.AspNet.Mvc.ActionConstraints;
-using Microsoft.AspNet.Mvc.Controllers;
 
-namespace Umbraco.Web.Controllers
+namespace Umbraco.Web.Routing
 {
     public class SurfaceActionConstraint : IActionConstraint
     {
 
         private readonly UmbracoContext _umbCtx;
-        public SurfaceActionConstraint(UmbracoContext umbCtx)
+        private readonly PublishedContentRequest _pcr;
+
+        public SurfaceActionConstraint(UmbracoContext umbCtx, PublishedContentRequest pcr)
         {
             _umbCtx = umbCtx;
+            _pcr = pcr;
         }
 
         public int Order => 0;
@@ -21,7 +23,7 @@ namespace Umbraco.Web.Controllers
             //Initialize the context, this will be called a few times but the initialize logic
             // only executes once. There might be a nicer way to do this but the RouteContext and 
             // other request scoped instances are not available yet.
-            _umbCtx.Initialize(context.RouteContext.RouteData);
+            _umbCtx.Initialize(_pcr);
 
             if (_umbCtx.HasContent == false) return false;
 
