@@ -1,0 +1,17 @@
+﻿@using System.Threading.Tasks
+@using Umbraco.Web
+@inject UmbracoContext UmbracoContext
+@model Umbraco.ViewModels.UmbracoFormTest
+
+<div>
+    @using (Html.BeginUmbracoForm(UmbracoContext, "DoThis", "TestSurface"))
+    {
+        @*@Html.EditorForModel(Model)*@
+        <div class="form-group">
+            <label for="name">Name</label><span>@Html.ValidationMessageFor(test => test.Name)</span>
+            @*@Html.EditorFor(test => test.Name)*@
+            <input type="text" name="name" id="name" class="form-control"/>
+        </div>
+        <button type="submit" class="btn btn-default">Submit</button>
+    }        
+</div>
