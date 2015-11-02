@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNet.Routing;
 using Microsoft.Framework.DependencyInjection;
 using Umbraco.Core;
@@ -64,7 +65,7 @@ namespace Umbraco.Web.Routing
             await ExecuteNext(context, newRouteData, oldRouteData);
         }
        
-        private async Task<bool> RouteUmbracoContentAsync(UmbracoContext umbCtx, PublishedContentRequest pcr, RouteData routeData)
+        internal async Task<bool> RouteUmbracoContentAsync(UmbracoContext umbCtx, PublishedContentRequest pcr, RouteData routeData)
         {
             //Initialize the context, this will be called a few times but the initialize logic
             // only executes once. There might be a nicer way to do this but the RouteContext and 
@@ -73,10 +74,7 @@ namespace Umbraco.Web.Routing
 
             //Prepare the request if it hasn't already been done
             if (pcr.IsPrepared == false)
-            {
-                //TODO: See https://github.com/aspnet/Mvc/issues/3412
-                // we want this method to be async
-                //NOTE: We are using the GetAwaiter() syntax in order to get a real exception instead of an Aggregate exception
+            {                
                 if (await pcr.PrepareAsync(routeData))
                 {
                     if (umbCtx.HasContent == false) return false;
@@ -85,8 +83,10 @@ namespace Umbraco.Web.Routing
             return umbCtx.HasContent;            
         }
 
-        private RouteDefinition GetUmbracoRouteValues(UmbracoContext umbCtx, UmbracoControllerTypeCollection umbControllerTypes)
+        internal RouteDefinition GetUmbracoRouteValues(UmbracoContext umbCtx, UmbracoControllerTypeCollection umbControllerTypes)
         {
+            if (umbCtx.PublishedContent == null) throw new ArgumentNullException(nameof(umbCtx) + ".PublishedContent");
+
             //Let's match controller names:        
             var found = umbControllerTypes.GetControllerName(umbCtx.PublishedContent.ContentType);
             //check if there are actually any controllers that match the content type

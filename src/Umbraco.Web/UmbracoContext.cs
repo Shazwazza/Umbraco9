@@ -22,6 +22,9 @@ namespace Umbraco.Web
         {
             _httpContextAccessor = httpContextAccessor;
 
+            if (httpContextAccessor.HttpContext == null) throw new ArgumentNullException(nameof(httpContextAccessor) + ".HttpContext");
+            if (httpContextAccessor.HttpContext.Request == null) throw new ArgumentNullException(nameof(httpContextAccessor) + ".HttpContext.Request");
+
             //TODO: Normally this is the 'cleaned umbraco url'
             RequestPath = _httpContextAccessor.HttpContext.Request.Path;
         }

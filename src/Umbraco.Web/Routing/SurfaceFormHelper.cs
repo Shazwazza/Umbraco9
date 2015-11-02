@@ -5,6 +5,7 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNet.DataProtection;
+using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Routing;
 using Microsoft.AspNet.WebUtilities;
 using Microsoft.Framework.Logging;
@@ -25,6 +26,46 @@ namespace Umbraco.Web.Routing
             _dataProtector = dataProtectionProvider.CreateProtector("Umbraco.Surface.Form");
         }
 
+        internal string GetRequestSurfaceToken(HttpRequest request)
+        {
+            string encodedVal;
+
+            switch (request.Method)
+            {
+                case "POST":
+                    //get the value from the request.
+                    //this field will contain an encrypted version of the surface route vals.
+                    encodedVal = request.HasFormContentType
+                        ? (string)request.Form["ufprt"]
+                        : null;
+                    if (encodedVal.IsNullOrWhiteSpace()) return null;
+                    break;
+                case "GET":
+                    //this field will contain an encrypted version of the surface route vals.
+                    encodedVal = request.Query["ufprt"];
+                    if (encodedVal.IsNullOrWhiteSpace()) return null;
+                    break;
+                default:
+                    return null;
+            }
+
+            return encodedVal;
+        }
+
+        internal bool ValidateRequiredTokenParams(Dictionary<string, string> decodedParts)
+        {
+            //the controller
+            if (decodedParts.All(x => x.Key != ReservedAdditionalKeys.Controller))
+                return false;
+            //the action
+            if (decodedParts.All(x => x.Key != ReservedAdditionalKeys.Action))
+                return false;
+            //the area
+            if (decodedParts.All(x => x.Key != ReservedAdditionalKeys.Area))
+                return false;
+            return true;
+        }
+
         /// <summary>
         /// Checks the request and query strings to see if it matches the definition of having a Surface controller
         /// posted/get value, if so, then we return a PostedDataProxyInfo object with the correct information.
@@ -34,28 +75,10 @@ namespace Umbraco.Web.Routing
         public RouteDefinition GetFormInfo(RouteContext routeContext)
         {
             if (routeContext == null) throw new ArgumentNullException(nameof(routeContext));
+            if (routeContext.HttpContext == null) throw new ArgumentNullException(nameof(routeContext) + ".HttpContext");
+            if (routeContext.HttpContext.Request == null) throw new ArgumentNullException(nameof(routeContext) + ".HttpContext.Request");
 
-            string encodedVal;
-
-            switch (routeContext.HttpContext.Request.Method)
-            {
-                case "POST":
-                    //get the value from the request.
-                    //this field will contain an encrypted version of the surface route vals.
-                    encodedVal = routeContext.HttpContext.Request.HasFormContentType 
-                        ? (string)routeContext.HttpContext.Request.Form["ufprt"]
-                        : null;
-                    if (encodedVal.IsNullOrWhiteSpace()) return null;
-                    break;
-                case "GET":
-                    //this field will contain an encrypted version of the surface route vals.
-                    encodedVal = routeContext.HttpContext.Request.Query["ufprt"];
-                    if (encodedVal.IsNullOrWhiteSpace()) return null;
-                    break;
-                default:
-                    return null;
-            }
-
+            var encodedVal = GetRequestSurfaceToken(routeContext.HttpContext.Request);
 
             string decryptedString;
             try
@@ -78,15 +101,8 @@ namespace Umbraco.Web.Routing
 
             //validate all required keys exist
 
-            //the controller
-            if (decodedParts.All(x => x.Key != ReservedAdditionalKeys.Controller))
-                return null;
-            //the action
-            if (decodedParts.All(x => x.Key != ReservedAdditionalKeys.Action))
-                return null;
-            //the area
-            if (decodedParts.All(x => x.Key != ReservedAdditionalKeys.Area))
-                return null;
+            var isValid = ValidateRequiredTokenParams(decodedParts);
+            if (isValid == false) return null;
 
             foreach (var item in decodedParts.Where(x => new[] {
                 ReservedAdditionalKeys.Controller,
@@ -131,7 +147,7 @@ namespace Umbraco.Web.Routing
         }
 
         // Define reserved dictionary keys for controller, action and area specified in route additional values data
-        private static class ReservedAdditionalKeys
+        internal static class ReservedAdditionalKeys
         {
             internal const string Controller = "c";
             internal const string Action = "a";
