@@ -15,10 +15,10 @@ using Microsoft.Dnx.Runtime;
 using Microsoft.Framework.Configuration;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Logging;
-using Umbraco.Models;
 using Umbraco.Services;
 using Umbraco.Web;
 using Umbraco.Web.Controllers;
+using Umbraco.Web.Routing;
 
 namespace Umbraco
 {
@@ -60,8 +60,11 @@ namespace Umbraco
             //    .AddDefaultTokenProviders();
 
             // Add MVC services to the services container.
-            services.AddMvc();
 
+            services.AddCaching();
+            services.AddSession();
+            services.AddMvc();
+            
             // Uncomment the following line to add Web API services which makes it easier to port Web API 2 controllers.
             // You will also need to add the Microsoft.AspNet.Mvc.WebApiCompatShim package to the 'dependencies' section of project.json.
             // services.AddWebApiConventions();
@@ -71,6 +74,10 @@ namespace Umbraco
             //services.AddTransient<ISmsSender, AuthMessageSender>();
 
             services.AddUmbraco();
+
+            //Register our test services, TODO: Make real implementations!
+            services.AddScoped<IContentFinder, FileSystemContentFinder>();
+            services.AddScoped<IUrlProvider, DefaultUrlProvider>();
         }
 
         // Configure is called after ConfigureServices is called.
@@ -128,6 +135,8 @@ namespace Umbraco
             //    options.ConsumerKey = Configuration["Authentication:Twitter:ConsumerKey"];
             //    options.ConsumerSecret = Configuration["Authentication:Twitter:ConsumerSecret"];
             //});
+
+            app.UseSession();
 
             // Add MVC to the request pipeline.
             app.UseMvc(routes =>

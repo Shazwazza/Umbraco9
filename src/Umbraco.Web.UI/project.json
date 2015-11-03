@@ -18,6 +18,7 @@
         "Microsoft.AspNet.Identity.EntityFramework": "3.0.0-beta8",
         "Microsoft.AspNet.IISPlatformHandler": "1.0.0-beta8",
         "Microsoft.AspNet.Mvc": "6.0.0-beta8",
+        "Microsoft.AspNet.Session": "1.0.0-beta8",
         "Microsoft.AspNet.Mvc.TagHelpers": "6.0.0-beta8",
         "Microsoft.AspNet.Server.Kestrel": "1.0.0-beta8",
         "Microsoft.AspNet.StaticFiles": "1.0.0-beta8",

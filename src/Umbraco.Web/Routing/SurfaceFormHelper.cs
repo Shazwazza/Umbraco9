@@ -80,6 +80,8 @@ namespace Umbraco.Web.Routing
 
             var encodedVal = GetRequestSurfaceToken(routeContext.HttpContext.Request);
 
+            if (string.IsNullOrWhiteSpace(encodedVal)) return null;
+
             string decryptedString;
             try
             {

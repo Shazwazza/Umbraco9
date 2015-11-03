@@ -13,12 +13,19 @@
 
     <p>Hello world, I'm an Umbraco document</p>
 
-    @if (ViewBag.warning != null)
+    @if (ViewBag.message != null)
     {
         <div class="alert alert-warning">
-            @ViewBag.warning
+            @ViewBag.message
         </div>
      }
+
+    @if (TempData["message"] != null)
+    {
+        <div class="alert alert-warning">
+            @TempData["message"]
+        </div>
+    }
 
     @Html.Partial("~/Views/Partials/UmbracoForm.cshtml", new UmbracoFormTest())
 </section>

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Umbraco.Web.Routing
 {
@@ -19,7 +20,7 @@ namespace Umbraco.Web.Routing
         /// <para>The url is absolute or relative depending on <c>mode</c> and on <c>current</c>.</para>
         /// <para>If the provider is unable to provide a url, it should return <c>null</c>.</para>
         /// </remarks>
-        string GetUrl(Guid id, Uri current, UrlProviderMode mode);
+        Task<string> GetUrlAsync(Guid id, Uri current, UrlProviderMode mode);
 
         /// <summary>
         /// Gets the other urls of a published content.
@@ -31,6 +32,6 @@ namespace Umbraco.Web.Routing
         /// <para>Other urls are those that <c>GetUrl</c> would not return in the current context, but would be valid
         /// urls for the node in other contexts (different domain for current request, umbracoUrlAlias...).</para>
         /// </remarks>
-        IEnumerable<string> GetOtherUrls(Guid id, Uri current);
+        Task<IEnumerable<string>> GetOtherUrlsAsync(Guid id, Uri current);
     }
 }

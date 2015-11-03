@@ -9,7 +9,7 @@ using Microsoft.Framework.DependencyInjection;
 using Umbraco.Core;
 using Umbraco.Web.Models;
 
-namespace Umbraco.Web.Controllers
+namespace Umbraco.Web.ActionResults
 {
     internal class ProxyControllerActionResult : IActionResult
     {

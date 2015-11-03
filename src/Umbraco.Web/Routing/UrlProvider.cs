@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Umbraco.Web.Routing
 {
@@ -48,9 +49,9 @@ namespace Umbraco.Web.Routing
         /// <para>The url is absolute or relative depending on <c>Mode</c> and on the current url.</para>
         /// <para>If the provider is unable to provide a url, it returns "#".</para>
         /// </remarks>
-        public string GetUrl(Guid id)
+        public async Task<string> GetUrlAsync(Guid id)
         {
-            return GetUrl(id, new Uri(_umbracoContext.RequestPath), Mode);
+            return await GetUrlAsync(id, new Uri(_umbracoContext.RequestPath, UriKind.Relative), Mode);
         }
 
         /// <summary>
@@ -64,10 +65,10 @@ namespace Umbraco.Web.Routing
         /// <c>absolute</c> is true, in which case the url is always absolute.</para>
         /// <para>If the provider is unable to provide a url, it returns "#".</para>
         /// </remarks>
-        public string GetUrl(Guid id, bool absolute)
+        public async Task<string> GetUrlAsync(Guid id, bool absolute)
         {
             var mode = absolute ? UrlProviderMode.Absolute : Mode;
-            return GetUrl(id, new Uri(_umbracoContext.RequestPath), mode);
+            return await GetUrlAsync(id, new Uri(_umbracoContext.RequestPath, UriKind.Relative), mode);
         }
 
         /// <summary>
@@ -82,10 +83,10 @@ namespace Umbraco.Web.Routing
         /// <c>absolute</c> is true, in which case the url is always absolute.</para>
         /// <para>If the provider is unable to provide a url, it returns "#".</para>
         /// </remarks>
-        public string GetUrl(Guid id, Uri current, bool absolute)
+        public async Task<string> GetUrlAsync(Guid id, Uri current, bool absolute)
         {
             var mode = absolute ? UrlProviderMode.Absolute : Mode;
-            return GetUrl(id, current, mode);
+            return await GetUrlAsync(id, current, mode);
         }
 
         /// <summary>
@@ -98,9 +99,9 @@ namespace Umbraco.Web.Routing
         /// <para>The url is absolute or relative depending on <c>mode</c> and on the current url.</para>
         /// <para>If the provider is unable to provide a url, it returns "#".</para>
         /// </remarks>
-        public string GetUrl(Guid id, UrlProviderMode mode)
+        public async Task<string> GetUrlAsync(Guid id, UrlProviderMode mode)
         {
-            return GetUrl(id, new Uri(_umbracoContext.RequestPath), mode);
+            return await GetUrlAsync(id, new Uri(_umbracoContext.RequestPath, UriKind.Relative), mode);
         }
 
         /// <summary>
@@ -114,11 +115,17 @@ namespace Umbraco.Web.Routing
         /// <para>The url is absolute or relative depending on <c>mode</c> and on <c>current</c>.</para>
         /// <para>If the provider is unable to provide a url, it returns "#".</para>
         /// </remarks>
-        public string GetUrl(Guid id, Uri current, UrlProviderMode mode)
+        public async Task<string> GetUrlAsync(Guid id, Uri current, UrlProviderMode mode)
         {
-            var url = _urlProviders.Select(provider => provider.GetUrl(id, current, mode))
-                .FirstOrDefault(u => u != null);
-            return url ?? "#"; // legacy wants this
+            foreach (var provider in _urlProviders)
+            {
+                var result = await provider.GetUrlAsync(id, current, mode);
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+            return null;
         }
 
         #endregion
@@ -135,9 +142,9 @@ namespace Umbraco.Web.Routing
         /// urls for the node in other contexts (different domain for current request, umbracoUrlAlias...).</para>
         /// <para>The results depend on the current url.</para>
         /// </remarks>
-        public IEnumerable<string> GetOtherUrls(Guid id)
+        public Task<IEnumerable<string>> GetOtherUrlsAsync(Guid id)
         {
-            return GetOtherUrls(id, new Uri(_umbracoContext.RequestPath));
+            return GetOtherUrlsAsync(id, new Uri(_umbracoContext.RequestPath, UriKind.Relative));
         }
 
         /// <summary>
@@ -150,12 +157,18 @@ namespace Umbraco.Web.Routing
         /// <para>Other urls are those that <c>GetUrl</c> would not return in the current context, but would be valid
         /// urls for the node in other contexts (different domain for current request, umbracoUrlAlias...).</para>
         /// </remarks>
-        public IEnumerable<string> GetOtherUrls(Guid id, Uri current)
+        public async Task<IEnumerable<string>> GetOtherUrlsAsync(Guid id, Uri current)
         {
-            // providers can return null or an empty list or a non-empty list, be prepared
-            var urls = _urlProviders.SelectMany(provider => provider.GetOtherUrls(id, current) ?? Enumerable.Empty<string>());
-
-            return urls;
+            var result = new List<string>();
+            foreach (var provider in _urlProviders)
+            {
+                var urls = await provider.GetOtherUrlsAsync(id, current);
+                if (urls != null)
+                {
+                    result.AddRange(urls);
+                }
+            }
+            return result;
         }
 
         #endregion

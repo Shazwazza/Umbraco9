@@ -39,14 +39,14 @@ namespace Umbraco.Web
             services.AddScoped<UmbracoContext>();
             services.AddScoped<RoutingContext>();
             services.AddScoped<PublishedContentRequest>();            
-            services.AddScoped<IContentFinder, PathContentFinder>();
+            
             //TODO: default is no last chance finder (for now)
             services.AddScoped<ILastChanceContentFinder>(provider => (ILastChanceContentFinder) null);
             services.AddScoped<UrlProvider>(provider => new UrlProvider(
                 provider.GetRequiredService<UmbracoContext>(),
                 provider.GetServices<IUrlProvider>(),
                 UrlProviderMode.Auto));            
-            services.AddScoped<IUrlProvider, DefaultUrlProvider>();
+            
 
             return services;
         }

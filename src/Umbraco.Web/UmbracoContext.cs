@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using Umbraco.Web.Models;
+using Umbraco.Web.PublishedCache;
 using Umbraco.Web.Routing;
 
 namespace Umbraco.Web
@@ -16,8 +17,6 @@ namespace Umbraco.Web
     /// </summary>
     public class UmbracoContext
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-
         public UmbracoContext(IHttpContextAccessor httpContextAccessor)
         {
             _httpContextAccessor = httpContextAccessor;
@@ -28,6 +27,8 @@ namespace Umbraco.Web
             //TODO: Normally this is the 'cleaned umbraco url'
             RequestPath = _httpContextAccessor.HttpContext.Request.Path;
         }
+        
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public void Initialize(PublishedContentRequest pcr)
         {
