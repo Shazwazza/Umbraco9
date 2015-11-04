@@ -27,30 +27,28 @@ namespace Umbraco.Web.ActionResults
         private RedirectResult _wrapped;
         public UmbracoContext UmbracoContext { get; }
         public IPublishedContent PublishedContent { get; }
-        public string Url
-        {
-            get
-            {
-                if (!_url.IsNullOrWhiteSpace()) return _url;                
 
-                var result = UmbracoContext.PublishedContentRequest.RoutingContext.UrlProvider.GetUrl(PublishedContent.Id);
-                if (result != "#")
-                {
-                    _url = result;
-                    return _url;
-                }
-                throw new InvalidOperationException($"Could not route to entity with id {PublishedContent.Id}, the NiceUrlProvider could not generate a URL");
+        public async Task<string> GetUrlAsync()
+        {
+            if (!_url.IsNullOrWhiteSpace()) return _url;
+
+            var result = await UmbracoContext.PublishedContentRequest.RoutingContext.UrlProvider.GetUrlAsync(PublishedContent.Id);
+            if (result != "#")
+            {
+                _url = result;
+                return _url;
             }
+            throw new InvalidOperationException($"Could not route to entity with id {PublishedContent.Id}, the NiceUrlProvider could not generate a URL");
         }
 
-        public override void ExecuteResult(ActionContext context)
+        public async override Task ExecuteResultAsync(ActionContext context)
         {
             if (context == null) throw new ArgumentNullException("context");
 
-            _wrapped = new RedirectResult(Url);
+            _wrapped = new RedirectResult(await GetUrlAsync());
             _wrapped.Permanent = false;
             _wrapped.ExecuteResult(context);
         }
-               
+       
     }
 }

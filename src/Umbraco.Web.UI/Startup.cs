@@ -18,6 +18,7 @@ using Microsoft.Framework.Logging;
 using Umbraco.Services;
 using Umbraco.Web;
 using Umbraco.Web.Controllers;
+using Umbraco.Web.PublishedCache;
 using Umbraco.Web.Routing;
 
 namespace Umbraco
@@ -78,6 +79,7 @@ namespace Umbraco
             //Register our test services, TODO: Make real implementations!
             services.AddScoped<IContentFinder, FileSystemContentFinder>();
             services.AddScoped<IUrlProvider, DefaultUrlProvider>();
+            services.AddScoped<IPublishedContentCache, FileSystemPublishedContentCache>();
         }
 
         // Configure is called after ConfigureServices is called.

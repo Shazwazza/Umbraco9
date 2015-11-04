@@ -9,6 +9,7 @@ using Newtonsoft.Json.Serialization;
 using Umbraco.Web.Models;
 using Umbraco.Web.PublishedCache;
 using Umbraco.Web.Routing;
+using Microsoft.AspNet.Http.Extensions;
 
 namespace Umbraco.Web
 {
@@ -25,7 +26,16 @@ namespace Umbraco.Web
             if (httpContextAccessor.HttpContext.Request == null) throw new ArgumentNullException(nameof(httpContextAccessor) + ".HttpContext.Request");
 
             //TODO: Normally this is the 'cleaned umbraco url'
-            RequestPath = _httpContextAccessor.HttpContext.Request.Path;
+            if (_httpContextAccessor.HttpContext.Request.Path.HasValue)
+            {
+                var fullUri = _httpContextAccessor.HttpContext.Request.GetEncodedUrl();
+                OriginalRequestUri = new Uri(fullUri);
+            }
+            else
+            {
+                throw new InvalidOperationException("The request must contain a Path value");
+            }
+            
         }
         
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -48,7 +58,7 @@ namespace Umbraco.Web
 
         //public string AltTemplate { get; private set; }
 
-        public string RequestPath { get; private set; }
+        public Uri OriginalRequestUri { get; private set; }
 
         public bool Initialized { get; private set; }
 

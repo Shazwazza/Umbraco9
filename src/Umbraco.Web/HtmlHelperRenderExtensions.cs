@@ -7,6 +7,7 @@ using Microsoft.AspNet.Mvc.ViewFeatures;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.WebEncoders;
 using Umbraco.Web.Routing;
+using Microsoft.AspNet.Http.Extensions;
 
 namespace Umbraco.Web
 {
@@ -21,7 +22,7 @@ namespace Umbraco.Web
             IDictionary<string, object> htmlAttributes = null,
             FormMethod method = FormMethod.Post)
         {            
-            var formAction = umbCtx.RequestPath;
+            var formAction = umbCtx.OriginalRequestUri.AbsolutePath;
             return html.RenderForm(formAction, method, htmlAttributes, controllerName, action, area, additionalRouteVals);
         }
 

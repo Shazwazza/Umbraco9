@@ -51,7 +51,7 @@ namespace Umbraco.Web.Routing
         /// </remarks>
         public async Task<string> GetUrlAsync(Guid id)
         {
-            return await GetUrlAsync(id, new Uri(_umbracoContext.RequestPath, UriKind.Relative), Mode);
+            return await GetUrlAsync(id, _umbracoContext.OriginalRequestUri, Mode);
         }
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace Umbraco.Web.Routing
         public async Task<string> GetUrlAsync(Guid id, bool absolute)
         {
             var mode = absolute ? UrlProviderMode.Absolute : Mode;
-            return await GetUrlAsync(id, new Uri(_umbracoContext.RequestPath, UriKind.Relative), mode);
+            return await GetUrlAsync(id, _umbracoContext.OriginalRequestUri, mode);
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace Umbraco.Web.Routing
         /// </remarks>
         public async Task<string> GetUrlAsync(Guid id, UrlProviderMode mode)
         {
-            return await GetUrlAsync(id, new Uri(_umbracoContext.RequestPath, UriKind.Relative), mode);
+            return await GetUrlAsync(id, _umbracoContext.OriginalRequestUri, mode);
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace Umbraco.Web.Routing
         /// </remarks>
         public Task<IEnumerable<string>> GetOtherUrlsAsync(Guid id)
         {
-            return GetOtherUrlsAsync(id, new Uri(_umbracoContext.RequestPath, UriKind.Relative));
+            return GetOtherUrlsAsync(id, _umbracoContext.OriginalRequestUri);
         }
 
         /// <summary>
