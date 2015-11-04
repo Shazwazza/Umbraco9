@@ -58,7 +58,6 @@ namespace Umbraco.Web
                 //Creates the Umbraco catch all route with the Umbraco router
                 routes.DefaultHandler = new UmbracoRouter(routes.DefaultHandler);
                 routes.MapRoute("Umbraco", "{*_umbracoRoute:Required}");
-                routes.MapRoute("UmbracoSurface", "{*_surfaceRoute:Required}");
             });
         }
     }

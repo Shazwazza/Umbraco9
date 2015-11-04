@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.ActionConstraints;
 using Microsoft.AspNet.Mvc.Filters;
@@ -20,14 +21,14 @@ namespace Umbraco.Web.Controllers
             _umbraco = umbraco;
         }
                 
-        public virtual ActionResult Index(IPublishedContent publishedContent)
+        public virtual Task<ActionResult> Index(IPublishedContent publishedContent)
         {         
             if (_umbraco.PublishedContent == null)
             {
                 throw new Exception("No content");
             }
 
-            return UmbracoViewForRoute(publishedContent);
+            return Task.FromResult(UmbracoViewForRoute(publishedContent));
         }
 
         protected ActionResult UmbracoViewForRoute(IPublishedContent publishedContent)

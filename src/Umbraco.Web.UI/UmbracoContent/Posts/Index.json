@@ -1,0 +1,6 @@
+﻿{
+    id:  "74D8AA65-8D4A-4000-B3AC-C07E8B2F354D",
+    name: "Blog post listing",
+    contentType: "BlogList",
+    templateId: "39A5FE40-1AF0-4293-A2F9-651B3C3454E9"
+}

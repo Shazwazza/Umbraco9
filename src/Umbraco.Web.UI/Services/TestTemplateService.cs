@@ -1,7 +1,8 @@
 ﻿using System;
 using Umbraco.Core.Models;
+using Umbraco.Core.Services;
 
-namespace Umbraco.Core.Services
+namespace Umbraco.Services
 {
     public class TestTemplateService : ITemplateService
     {
@@ -13,21 +14,21 @@ namespace Umbraco.Core.Services
         {
             switch (alias)
             {
-                case "Home":
+                case "UmbracoHome":
                     return new Template
                     {
                         Alias = alias,
                         Id = new Guid(Template1Id),
                         Name = alias
                     };
-                case "ContentPage":
+                case "BlogPost":
                     return new Template
                     {
                         Alias = alias,
                         Id = new Guid(Template2Id),
                         Name = alias
                     };
-                case "ContactForm":
+                case "BlogList":
                     return new Template
                     {
                         Alias = alias,
@@ -55,16 +56,16 @@ namespace Umbraco.Core.Services
                 case Template2Id:
                     return new Template
                     {
-                        Alias = "UmbracoContentPage",
-                        Id = new Guid(Template1Id),
-                        Name = "ContentPage"
+                        Alias = "BlogPost",
+                        Id = new Guid(Template2Id),
+                        Name = "Blog Post"
                     };
                 case Template3Id:
                     return new Template
                     {
-                        Alias = "UmbracoContactForm",
-                        Id = new Guid(Template1Id),
-                        Name = "ContactForm"
+                        Alias = "BlogList",
+                        Id = new Guid(Template3Id),
+                        Name = "Blog List"
                     };
                 default:
                     throw new IndexOutOfRangeException();

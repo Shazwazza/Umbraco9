@@ -66,12 +66,23 @@ namespace Umbraco.Services
         public Task<IPublishedContent> GetByRouteAsync(bool preview, string route)
         {
             if (preview) throw new NotImplementedException("No preview support yet");
+            
+            var fileInfo = _fileProvider.GetFileInfo(string.Concat("UmbracoContent/", route , ".json"));
 
-            var fileInfo = _fileProvider.GetFileInfo(string.Concat("UmbracoContent/", route + ".json"));
-
-            if (fileInfo != null)
+            if (fileInfo != null && fileInfo.Exists)
             {
                 return Task.FromResult(ReadContent(fileInfo));
+            }
+
+            //check for folder +  'Index.json'
+            var dirInfo = _fileProvider.GetDirectoryContents(string.Concat("UmbracoContent/", route));
+            if (dirInfo.Exists)
+            {
+                fileInfo = _fileProvider.GetFileInfo(string.Concat("UmbracoContent/", route, "/index.json"));
+                if (fileInfo != null)
+                {
+                    return Task.FromResult(ReadContent(fileInfo));
+                }
             }
             return Task.FromResult((IPublishedContent)null);
         }
@@ -87,7 +98,8 @@ namespace Umbraco.Services
                     .Replace("\\", "/")                                        
                     .ToLowerInvariant()
                     .TrimEnd(".json")
-                    .TrimStart("umbracocontent/"));
+                    .TrimStart("umbracocontent/")
+                    .EnsureStartsWith("/"));
             }
             return Task.FromResult((string) null);
         }

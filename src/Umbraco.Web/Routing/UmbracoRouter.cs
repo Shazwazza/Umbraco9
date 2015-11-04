@@ -37,7 +37,9 @@ namespace Umbraco.Web.Routing
             newRouteData.Routers.Add(_next);
 
             //It's an umbraco route, need to find out if it matches any content
-            if (newRouteData.Values.ContainsKey("_umbracoRoute"))
+            if (newRouteData.Values.ContainsKey("_umbracoRoute") 
+                //exit quickly if there's any file extension
+                && newRouteData.Values["_umbracoRoute"].ToString().Contains(".") == false)
             {
                 var umbCtx = context.HttpContext.RequestServices.GetRequiredService<UmbracoContext>();
                 var umbControllerTypes = context.HttpContext.ApplicationServices.GetRequiredService<UmbracoControllerTypeCollection>();

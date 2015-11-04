@@ -1,6 +1,6 @@
 ﻿{
 	id: "89ABD92C-CC01-428B-BCF0-47D712044DD8",
 	name: "Home page",	
-	contentType: "Home",
+	contentType: "BlogRoot",
 	templateId: "33FDCCA6-F563-4686-BA3D-1BFC4575ED21"
 }
