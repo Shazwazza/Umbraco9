@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Mvc;
-using Umbraco.Web.Models.BackOffice;
-using Umbraco.Web.Security;
 
 namespace Umbraco.Web.Controllers.BackOffice
 {
@@ -27,12 +25,12 @@ namespace Umbraco.Web.Controllers.BackOffice
             return View();
         }
 
-        [HttpPost]
-        [Route("[Area]/Login")]
-        public IActionResult Login(LoginModel model)
-        {
-            return View();
-        }
+        //[HttpPost]
+        //[Route("[Area]/Login")]
+        //public IActionResult Login(LoginModel model)
+        //{
+        //    return View();
+        //}
 
     }
 }

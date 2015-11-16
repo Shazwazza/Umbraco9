@@ -17,9 +17,7 @@ using Microsoft.Framework.DependencyInjection.Extensions;
 using Microsoft.Framework.OptionsModel;
 using Umbraco.Core;
 using Umbraco.Web.Controllers;
-using Umbraco.Web.Models.BackOffice;
 using Umbraco.Web.Routing;
-using Umbraco.Web.Security;
 
 namespace Umbraco.Web
 {
@@ -62,8 +60,7 @@ namespace Umbraco.Web
 
             services.AddScoped<UmbracoContext>();
             services.AddScoped<RoutingContext>();
-            services.AddScoped<PublishedContentRequest>();
-            services.AddScoped<BackOfficeSignInManager>();        
+            services.AddScoped<PublishedContentRequest>();            
             
             //TODO: default is no last chance finder (for now)
             services.AddScoped<ILastChanceContentFinder>(provider => (ILastChanceContentFinder) null);
