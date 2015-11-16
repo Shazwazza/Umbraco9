@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Builder;
+using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.ActionConstraints;
 using Microsoft.AspNet.Mvc.Controllers;
@@ -14,7 +17,9 @@ using Microsoft.Framework.DependencyInjection.Extensions;
 using Microsoft.Framework.OptionsModel;
 using Umbraco.Core;
 using Umbraco.Web.Controllers;
+using Umbraco.Web.Models.BackOffice;
 using Umbraco.Web.Routing;
+using Umbraco.Web.Security;
 
 namespace Umbraco.Web
 {
@@ -24,10 +29,29 @@ namespace Umbraco.Web
         {
             services.AddUmbracoCore();
 
+            services.AddCaching();
+            services.AddSession();
+            services.AddMvc();
+            //services.AddAuthentication();
+            //services.AddAuthorization();
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(
+                    "umbraco-backoffice",
+                    builder => builder
+                        .AddAuthenticationSchemes("umbraco-backoffice")
+                        .RequireAuthenticatedUser()
+                        .RequireClaim("umbraco-backoffice")
+                    );
+            });
+
             services.Configure<MvcOptions>(options =>
             {
                 options.ModelBinders.Insert(0, new PublishedContentModelBinder());  
             });
+
+            //services.AddIdentity<BackOfficeUser, IdentityRole>();
 
             services.AddSingleton<IControllerActivator, UmbracoControllerActivator>();
             //services.AddSingleton<UmbracoAssemblyProvider>();
@@ -38,7 +62,8 @@ namespace Umbraco.Web
 
             services.AddScoped<UmbracoContext>();
             services.AddScoped<RoutingContext>();
-            services.AddScoped<PublishedContentRequest>();            
+            services.AddScoped<PublishedContentRequest>();
+            services.AddScoped<BackOfficeSignInManager>();        
             
             //TODO: default is no last chance finder (for now)
             services.AddScoped<ILastChanceContentFinder>(provider => (ILastChanceContentFinder) null);
@@ -53,6 +78,36 @@ namespace Umbraco.Web
 
         public static void UseUmbraco(this IApplicationBuilder app)
         {
+            app.UseSession();
+
+            //TODO: This is currently here to authenticate every back office requests until we implement logins/etc...
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Path.StartsWithSegments("/Umbraco"))
+                {
+                    if (!context.User.Identities.Any(identity => identity.IsAuthenticated))
+                    {
+                        var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
+                        {
+                            new Claim(ClaimTypes.Name, "admin"),
+                            new Claim("umbraco-backoffice", "yes")
+                        }, "umbraco-backoffice"));
+
+                        await context.Authentication.SignInAsync("umbraco-backoffice", user);
+                    }                    
+                }
+                await next();
+            });
+
+            app.UseCookieAuthentication(options =>
+            {
+                options.CookiePath = "Umbraco";
+                options.CookieName = "UMB_CONTEXT";
+                options.LoginPath = "/Umbraco/Login";
+                options.AutomaticAuthentication = true;
+                options.AuthenticationScheme = "umbraco-backoffice";
+            });
+
             app.UseMvc(routes =>
             {
                 //Creates the Umbraco catch all route with the Umbraco router

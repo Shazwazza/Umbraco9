@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Authentication.Cookies;
 using Microsoft.AspNet.Authentication.Facebook;
 using Microsoft.AspNet.Authentication.Google;
 using Microsoft.AspNet.Authentication.MicrosoftAccount;
@@ -50,10 +52,6 @@ namespace Umbraco
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCaching();
-            services.AddSession();
-            services.AddMvc();
-       
             services.AddUmbraco();
 
             //Register our test services, TODO: Make real implementations!
@@ -92,7 +90,11 @@ namespace Umbraco
             // Add static files to the request pipeline.
             app.UseStaticFiles();
 
-            app.UseSession();
+            
+            app.UseUmbraco();
+
+           
+
 
             // Add MVC to the request pipeline.
             app.UseMvc(routes =>
@@ -105,7 +107,7 @@ namespace Umbraco
                 // routes.MapWebApiRoute("DefaultApi", "api/{controller}/{id?}");
             });
 
-            app.UseUmbraco();
+           
         }
     }
 }

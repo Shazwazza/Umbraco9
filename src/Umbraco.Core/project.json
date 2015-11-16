@@ -9,9 +9,16 @@
         "Microsoft.Framework.Configuration.Abstractions": "1.0.0-beta8",
         "Microsoft.Framework.Configuration.Json": "1.0.0-beta8",
         "Microsoft.Framework.DependencyInjection": "1.0.0-beta8",
-        "Microsoft.Framework.WebEncoders.Core": "1.0.0-beta8"
+        "Microsoft.Framework.WebEncoders.Core": "1.0.0-beta8",
+        "System.Xml.XDocument": "4.0.10-beta-*",
+        "System.Runtime.Serialization.Xml": "4.0.10-beta-*"
     },
     "frameworks": {
-        "dnx451": { }
+        "dnx451": {
+            "frameworkAssemblies": {
+                "System.Runtime": "",
+                "System.Diagnostics.Debug": ""
+            }
+        }
     }
 }
