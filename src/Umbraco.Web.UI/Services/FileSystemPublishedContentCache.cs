@@ -10,6 +10,7 @@ using Newtonsoft.Json.Serialization;
 using Umbraco.Web.Models;
 using Umbraco.Web.PublishedCache;
 using Umbraco.Core;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Umbraco.Services
 {

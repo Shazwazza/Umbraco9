@@ -6,8 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Routing;
-using Microsoft.Framework.Configuration;
-using Microsoft.Framework.Logging;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Umbraco.Core.Services;
 
 namespace Umbraco.Web.Routing

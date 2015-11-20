@@ -1,25 +1,26 @@
 ﻿{
-    "version": "1.0.0-*",
-    "title": "Umbraco.Web",
-    "description": "Umbraco.Web Class Library",
-    "authors": [ "Shannon Deminick" ],
-    "tags": [ "" ],
-    "projectUrl": "",
-    "licenseUrl": "",
+  "version": "1.0.0-*",
+  "title": "Umbraco.Web",
+  "description": "Umbraco.Web Class Library",
+  "authors": [ "Shannon Deminick" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
 
-    "dependencies": {
-        "Umbraco.Core": "1.0.0-*",
-        "Microsoft.AspNet.Mvc": "6.0.0-beta8",
-        "Microsoft.Framework.Configuration.Abstractions": "1.0.0-beta8",
-        "Microsoft.Framework.Configuration.Json": "1.0.0-beta8",
-        "Newtonsoft.Json": "8.0.1-beta1",
-        "Microsoft.AspNet.Identity.EntityFramework": "3.0.0-beta8",
-        "Microsoft.AspNet.Authentication.Cookies": "1.0.0-beta8",
-        "Microsoft.AspNet.DataProtection": "1.0.0-beta8",
-        "Microsoft.AspNet.Session": "1.0.0-beta8"
-    },
+  "dependencies": {
+    "Umbraco.Core": "1.0.0-*",
+    "Microsoft.AspNet.Mvc": "6.0.0-rc1-final",
+    "Microsoft.Extensions.Configuration.Abstractions": "1.0.0-rc1-final",
+    "Microsoft.Extensions.Configuration.Json": "1.0.0-rc1-final",
+    "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0-rc1-final",
+    "Newtonsoft.Json": "8.0.1-beta1",
+    "Microsoft.AspNet.Identity.EntityFramework": "3.0.0-rc1-final",
+    "Microsoft.AspNet.Authentication.Cookies": "1.0.0-rc1-final",
+    "Microsoft.AspNet.DataProtection": "1.0.0-rc1-final",
+    "Microsoft.AspNet.Session": "1.0.0-rc1-final"
+  },
 
-    "frameworks": {
-        "dnx451": {}        
-    }
+  "frameworks": {
+    "dnx451": { }
+  }
 }

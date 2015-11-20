@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNet.Mvc.ModelBinding;
 using Microsoft.AspNet.Mvc.ModelBinding.Validation;
-using Microsoft.Framework.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Umbraco.Web.Models;
 
 namespace Umbraco.Web.Controllers

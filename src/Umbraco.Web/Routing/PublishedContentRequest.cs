@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Routing;
-using Microsoft.Framework.Logging;
+using Microsoft.Extensions.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
 using Umbraco.Web.Models;

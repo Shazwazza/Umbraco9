@@ -8,10 +8,10 @@
 
     "dependencies": {
         "Umbraco.Web": "1.0.0-*",
-        "Moq": "4.2.1-*", 
+        "Moq": "4.2.1510.2205", 
         "xunit": "2.1.0-*",
         "xunit.runner.dnx": "2.1.0-*",
-        "Microsoft.AspNet.Http": "1.0.0-beta8"
+        "Microsoft.AspNet.Http": "1.0.0-rc1-final"
     },
     "commands": {
         "test": "xunit.runner.dnx" 
