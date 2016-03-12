@@ -1,11 +1,17 @@
 ﻿using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNet.Builder;
+using Microsoft.AspNet.FileProviders;
+using Microsoft.AspNet.Hosting;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.Controllers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.PlatformAbstractions;
 using Umbraco.Core;
+using Umbraco.Core.Plugins;
 using Umbraco.Web.Controllers;
+using Umbraco.Web.Plugins;
 using Umbraco.Web.Routing;
 
 namespace Umbraco.Web
@@ -16,6 +22,13 @@ namespace Umbraco.Web
         {
             services.AddUmbracoCore();
 
+            services.AddSingleton<IUmbracoAssemblyProvider, PluginAssemblyProvider>(provider =>
+            {
+                var hosting = provider.GetRequiredService<IApplicationEnvironment>();
+                var fileProvider = new PhysicalFileProvider(hosting.ApplicationBasePath);
+                return new PluginAssemblyProvider(fileProvider, provider.GetRequiredService<ILoggerFactory>());
+            });
+            
             services.AddCaching();
             services.AddSession();
             services.AddMvc();
@@ -96,6 +109,11 @@ namespace Umbraco.Web
 
             app.UseMvc(routes =>
             {
+                //Finds all surface controllers and routes them
+                var typeFinder = app.ApplicationServices.GetService<ITypeFinder>();
+                var surfaceControllers = typeFinder.FindClassesOfType<SurfaceController>();
+                //TODO: Now that we are type finding, we can auto route the controllers :)
+
                 //Creates the Umbraco catch all route with the Umbraco router
                 routes.DefaultHandler = new UmbracoRouter(routes.DefaultHandler);
                 routes.MapRoute("Umbraco", "{*_umbracoRoute:Required}");

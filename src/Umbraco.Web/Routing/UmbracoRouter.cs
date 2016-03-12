@@ -8,6 +8,9 @@ using Umbraco.Web.Models;
 
 namespace Umbraco.Web.Routing
 {
+    /// <summary>
+    /// The router that performs all umbraco content lookups based on the current request url/path
+    /// </summary>
     public class UmbracoRouter : IRouter
     {
         private readonly IRouter _next;

@@ -1,0 +1,15 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "Umbraco.PluginExamples Class Library",
+  "authors": [ "Shannon" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+  "frameworks": {
+    "dnx451": { }
+  },
+  "dependencies": {
+    "Umbraco.Core": "1.0.0-*",
+    "Umbraco.Web": "1.0.0-*"
+  }
+}
