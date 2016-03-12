@@ -12,9 +12,9 @@ using Microsoft.AspNet.Mvc.ActionConstraints;
 using Microsoft.AspNet.Mvc.Controllers;
 using Microsoft.AspNet.Mvc.Infrastructure;
 using Microsoft.Dnx.Runtime;
-using Microsoft.Framework.DependencyInjection;
-using Microsoft.Framework.DependencyInjection.Extensions;
-using Microsoft.Framework.OptionsModel;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Abstractions;
+using Microsoft.Extensions.OptionsModel;
 using Umbraco.Core;
 using Umbraco.Web.Controllers;
 using Umbraco.Web.Routing;
@@ -101,7 +101,7 @@ namespace Umbraco.Web
                 options.CookiePath = "Umbraco";
                 options.CookieName = "UMB_CONTEXT";
                 options.LoginPath = "/Umbraco/Login";
-                options.AutomaticAuthentication = true;
+                options.AutomaticAuthenticate = true;
                 options.AuthenticationScheme = "umbraco-backoffice";
             });
 

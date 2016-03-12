@@ -8,8 +8,8 @@ using Microsoft.AspNet.DataProtection;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Routing;
 using Microsoft.AspNet.WebUtilities;
-using Microsoft.Framework.Logging;
-using Microsoft.Framework.WebEncoders;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.WebEncoders;
 using Umbraco.Core;
 using Umbraco.Web.Models;
 

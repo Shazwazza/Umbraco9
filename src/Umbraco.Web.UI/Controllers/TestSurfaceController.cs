@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.ModelBinding;
-using Microsoft.Framework.Primitives;
+using Microsoft.Extensions.Primitives;
 using Umbraco.ViewModels;
 using Umbraco.Web;
 using Umbraco.Web.Controllers;

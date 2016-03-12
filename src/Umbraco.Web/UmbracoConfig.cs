@@ -1,5 +1,6 @@
 using Microsoft.Dnx.Runtime;
-using Microsoft.Framework.Configuration;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Umbraco.Web
 {

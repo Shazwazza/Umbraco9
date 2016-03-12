@@ -4,8 +4,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Mvc.Rendering;
 using Microsoft.AspNet.Mvc.ViewFeatures;
-using Microsoft.Framework.DependencyInjection;
-using Microsoft.Framework.WebEncoders;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.WebEncoders;
 using Umbraco.Web.Routing;
 using Microsoft.AspNet.Http.Extensions;
 
