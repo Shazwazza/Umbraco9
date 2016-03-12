@@ -1,13 +1,6 @@
 using System;
-using System.IO;
 using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Routing;
-using Microsoft.Dnx.Runtime;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 using Umbraco.Web.Models;
-using Umbraco.Web.PublishedCache;
 using Umbraco.Web.Routing;
 using Microsoft.AspNet.Http.Extensions;
 

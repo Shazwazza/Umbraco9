@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Dnx.Runtime;
 using Umbraco.Web.PublishedCache;
 using Umbraco.Web.Routing;
 

@@ -1,10 +1,4 @@
-﻿using System.IO;
-using System.Threading.Tasks;
-using Microsoft.AspNet.FileProviders;
-using Microsoft.Dnx.Runtime;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using Umbraco.Web.Models;
+﻿using System.Threading.Tasks;
 using Umbraco.Web.PublishedCache;
 using Umbraco.Web.Routing;
 
