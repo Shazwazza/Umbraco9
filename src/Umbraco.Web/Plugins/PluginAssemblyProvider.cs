@@ -63,7 +63,7 @@ namespace Umbraco.Web.Plugins
                 {
                     //// You should be able to use Assembly.Load()
                     //var assembly1 = Assembly.Load(new AssemblyName("SomethingElse"));
-                    var assembly2 = loadContext.Load(Path.GetFileNameWithoutExtension(fileSystemInfo.Name));                    
+                    var assembly2 = loadContext.Load(Path.GetFileNameWithoutExtension(fileSystemInfo.Name));
                     yield return assembly2;
                 }
             }
