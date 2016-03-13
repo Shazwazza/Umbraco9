@@ -55,8 +55,7 @@ namespace Umbraco.Web.Plugins
             // Use the default load context
             var loadContext = PlatformServices.Default.AssemblyLoadContextAccessor.Default;
 
-            // Add the loader to the container so that any call to Assembly.Load will
-            // call the load context back (if it's not already loaded)
+            // Add the loader to the container so that any call to Assembly.Load will call the load context back (if it's not already loaded)
             using (PlatformServices.Default.AssemblyLoaderContainer.AddLoader(
                 new DirectoryLoader(binPath, loadContext)))
             {
@@ -64,15 +63,7 @@ namespace Umbraco.Web.Plugins
                 {
                     //// You should be able to use Assembly.Load()
                     //var assembly1 = Assembly.Load(new AssemblyName("SomethingElse"));
-
-                    // Or call load on the context directly
-                    var assembly2 = loadContext.Load(Path.GetFileNameWithoutExtension(fileSystemInfo.Name));
-
-                    //foreach (var definedType in assembly2.DefinedTypes)
-                    //{
-                    //    _logger.LogDebug("Found type {0}", definedType.FullName);
-                    //}
-
+                    var assembly2 = loadContext.Load(Path.GetFileNameWithoutExtension(fileSystemInfo.Name));                    
                     yield return assembly2;
                 }
             }
