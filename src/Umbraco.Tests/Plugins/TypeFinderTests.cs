@@ -42,7 +42,10 @@ namespace Umbraco.Tests.Plugins
                     typeof(ITypeFinder).Assembly,
                     typeof(UmbracoRouter).Assembly
                 };
-            _typeFinder = new TypeFinder(Mock.Of<ILoggerFactory>(), new[] {new StaticAssemblyProvider(_assemblies)});
+            _typeFinder = new TypeFinder(
+                Mock.Of<ILoggerFactory>(), 
+                new TypeHelper(), 
+                new[] {new StaticAssemblyProvider(_assemblies)});
         }
 
         [Fact]

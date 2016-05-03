@@ -10,6 +10,10 @@ using Microsoft.Extensions.PlatformAbstractions;
 using Umbraco.Core;
 using Umbraco.Core.Plugins;
 
+#if DNXCORE50
+using System.Runtime.Loader;
+#endif
+
 namespace Umbraco.Web.Plugins
 {
     /// <summary>
@@ -69,9 +73,13 @@ namespace Umbraco.Web.Plugins
                 foreach (var fileSystemInfo in binPath.GetFileSystemInfos("*.dll"))
                 {
                     //// You should be able to use Assembly.Load()
-                    //var assembly1 = Assembly.Load(AssemblyName.GetAssemblyName(fileSystemInfo.FullName));
-                    var assembly2 = loadContext.Load(AssemblyName.GetAssemblyName(fileSystemInfo.FullName));
+                    //var assembly1 = Assembly.Load(AssemblyName.GetAssemblyName(fileSystemInfo.FullName));                    
 
+#if DNX46
+                    var assembly2 = loadContext.Load(AssemblyName.GetAssemblyName(fileSystemInfo.FullName)); 
+#else
+                    var assembly2 = loadContext.Load(AssemblyLoadContext.GetAssemblyName(fileSystemInfo.FullName));
+#endif
                     yield return assembly2;
                 }
             }

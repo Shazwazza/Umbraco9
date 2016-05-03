@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Umbraco.Core.Plugins
 {
@@ -11,18 +12,31 @@ namespace Umbraco.Core.Plugins
 	/// A utility class for type checking, this provides internal caching so that calls to these methods will be faster
 	/// than doing a manual type check in c#
 	/// </summary>
-	internal static class TypeHelper
+	public class TypeHelper
     {
+        
+#if DNX46
+        public TypeHelper()
+        {
 
-        private static readonly ConcurrentDictionary<Type, FieldInfo[]> GetFieldsCache = new ConcurrentDictionary<Type, FieldInfo[]>();
-        private static readonly ConcurrentDictionary<Tuple<Type, bool, bool, bool>, PropertyInfo[]> GetPropertiesCache = new ConcurrentDictionary<Tuple<Type, bool, bool, bool>, PropertyInfo[]>();
+        }
+#else
+        public TypeHelper(ILibraryManager libraryManager)
+        {
+            _libraryManager = libraryManager;
+        }
+#endif
+
+        private readonly ILibraryManager _libraryManager;
+        private readonly ConcurrentDictionary<Type, FieldInfo[]> _getFieldsCache = new ConcurrentDictionary<Type, FieldInfo[]>();
+        private readonly ConcurrentDictionary<Tuple<Type, bool, bool, bool>, PropertyInfo[]> _getPropertiesCache = new ConcurrentDictionary<Tuple<Type, bool, bool, bool>, PropertyInfo[]>();
 
         /// <summary>
         /// Checks if the method is actually overriding a base method
         /// </summary>
         /// <param name="m"></param>
         /// <returns></returns>
-        public static bool IsOverride(MethodInfo m)
+        public bool IsOverride(MethodInfo m)
         {
             return m.GetBaseDefinition().DeclaringType != m.DeclaringType;
         }
@@ -37,16 +51,26 @@ namespace Umbraco.Core.Plugins
         /// If the assembly of the assignTypeFrom Type is in the App_Code assembly, then we return nothing since things cannot
         /// reference that assembly, same with the global.asax assembly.
         /// </remarks>
-        public static Assembly[] GetReferencedAssemblies(Type assignTypeFrom, IEnumerable<Assembly> assemblies)
+        public Assembly[] GetReferencedAssemblies(Type assignTypeFrom, IEnumerable<Assembly> assemblies)
         {
             //find all assembly references that are referencing the current type's assembly since we 
             //should only be scanning those assemblies because any other assembly will definitely not
             //contain sub type's of the one we're currently looking for
+
+            Func<Type, Assembly> getAssembly = type =>
+            {
+#if DNX46
+                return type.Assembly;
+#else
+                return type.GetTypeInfo().Assembly;
+#endif
+            };
+
             return assemblies
-                .Where(assembly =>
-                       assembly == assignTypeFrom.Assembly
-                        || HasReferenceToAssemblyWithName(assembly, assignTypeFrom.Assembly.GetName().Name))
+                .Where(assembly => assembly == getAssembly(assignTypeFrom) || HasReferenceToAssemblyWithName(assembly, getAssembly(assignTypeFrom).GetName().Name))
                 .ToArray();
+
+
         }
 
         /// <summary>
@@ -55,10 +79,17 @@ namespace Umbraco.Core.Plugins
         /// <param name="assembly"></param>
         /// <param name="expectedAssemblyName"></param>
         /// <returns></returns>
-        private static bool HasReferenceToAssemblyWithName(Assembly assembly, string expectedAssemblyName)
+        private bool HasReferenceToAssemblyWithName(Assembly assembly, string expectedAssemblyName)
         {
+
+#if DNX46
             return assembly
                 .GetReferencedAssemblies()
+#else
+            //TODO: Need to figure out if this works!
+            return
+                _libraryManager.GetReferencingLibraries(assembly.GetName().Name)
+#endif
                 .Select(a => a.Name)
                 .Contains(expectedAssemblyName, StringComparer.Ordinal);
         }
@@ -68,23 +99,37 @@ namespace Umbraco.Core.Plugins
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
-	    public static bool IsNonStaticClass(Type t)
+	    public bool IsNonStaticClass(Type t)
         {
-            return t.IsClass && IsStaticClass(t) == false;
+            return
+#if DNX46
+                t.IsClass
+#else
+                t.GetTypeInfo().IsClass
+#endif
+
+                && IsStaticClass(t) == false;
         }
 
         /// <summary>
-        /// Returns true if the type is a static class
+        /// Returns true if the type is a class
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
         /// <remarks>
-        /// In IL a static class is abstract and sealed
+        /// In IL a class is abstract and sealed
         /// see: http://stackoverflow.com/questions/1175888/determine-if-a-type-is-static
         /// </remarks>
-        public static bool IsStaticClass(Type type)
+        public bool IsStaticClass(Type type)
         {
-            return type.IsAbstract && type.IsSealed;
+            return
+
+#if DNX46
+                type.IsAbstract && type.IsSealed;
+#else
+                type.GetTypeInfo().IsAbstract && type.GetTypeInfo().IsSealed;
+#endif
+
         }
 
         /// <summary>
@@ -96,7 +141,7 @@ namespace Umbraco.Core.Plugins
         /// The term 'lowest' refers to the most base class of the type collection.
         /// If a base type is not found amongst the type collection then an invalid attempt is returned.
         /// </remarks>
-        public static Attempt<Type> GetLowestBaseType(params Type[] types)
+        public Attempt<Type> GetLowestBaseType(params Type[] types)
         {
             if (types.Length == 0)
             {
@@ -133,7 +178,7 @@ namespace Umbraco.Core.Plugins
 		/// <returns>
 		/// 	<c>true</c> if [is type assignable from] [the specified contract]; otherwise, <c>false</c>.
 		/// </returns>
-		public static bool IsTypeAssignableFrom(Type contract, Type implementation)
+		public bool IsTypeAssignableFrom(Type contract, Type implementation)
         {
             return contract.IsAssignableFrom(implementation);
         }
@@ -144,7 +189,7 @@ namespace Umbraco.Core.Plugins
         /// </summary>
         /// <typeparam name="TContract">The type of the contract.</typeparam>
         /// <param name="implementation">The implementation.</param>
-        public static bool IsTypeAssignableFrom<TContract>(Type implementation)
+        public bool IsTypeAssignableFrom<TContract>(Type implementation)
         {
             return IsTypeAssignableFrom(typeof(TContract), implementation);
         }
@@ -155,7 +200,7 @@ namespace Umbraco.Core.Plugins
         /// </summary>
         /// <typeparam name="TContract">The type of the contract.</typeparam>
         /// <param name="implementation">The implementation.</param>
-        public static bool IsTypeAssignableFrom<TContract>(object implementation)
+        public bool IsTypeAssignableFrom<TContract>(object implementation)
         {
             if (implementation == null) throw new ArgumentNullException("implementation");
             return IsTypeAssignableFrom<TContract>(implementation.GetType());
@@ -165,18 +210,29 @@ namespace Umbraco.Core.Plugins
         /// A method to determine whether <paramref name="implementation"/> represents a value type.
         /// </summary>
         /// <param name="implementation">The implementation.</param>
-        public static bool IsValueType(Type implementation)
+        public bool IsValueType(Type implementation)
         {
+#if DNX46
             return implementation.IsValueType || implementation.IsPrimitive;
+#else
+            return implementation.GetTypeInfo().IsValueType || implementation.GetTypeInfo().IsPrimitive;
+#endif
+
         }
 
         /// <summary>
         /// A method to determine whether <paramref name="implementation"/> is an implied value type (<see cref="Type.IsValueType"/>, <see cref="Type.IsEnum"/> or a string).
         /// </summary>
         /// <param name="implementation">The implementation.</param>
-        public static bool IsImplicitValueType(Type implementation)
+        public bool IsImplicitValueType(Type implementation)
         {
-            return IsValueType(implementation) || implementation.IsEnum || implementation == typeof(string);
+            return IsValueType(implementation)
+#if DNX46
+                || implementation.IsEnum
+#else
+                || implementation.GetTypeInfo().IsEnum
+#endif
+                || implementation == typeof(string);
         }
 
         /// <summary>
@@ -189,7 +245,7 @@ namespace Umbraco.Core.Plugins
         /// <param name="includeIndexed"></param>
         /// <param name="caseSensitive"> </param>
         /// <returns></returns>
-        public static PropertyInfo GetProperty(Type type, string name,
+        public PropertyInfo GetProperty(Type type, string name,
             bool mustRead = true,
             bool mustWrite = true,
             bool includeIndexed = false,
@@ -209,9 +265,9 @@ namespace Umbraco.Core.Plugins
         /// </summary>
         /// <param name="type">The source.</param>
         /// <returns></returns>
-        public static FieldInfo[] CachedDiscoverableFields(Type type)
+        public FieldInfo[] CachedDiscoverableFields(Type type)
         {
-            return GetFieldsCache.GetOrAdd(
+            return _getFieldsCache.GetOrAdd(
                 type,
                 x => type
                          .GetFields(BindingFlags.Public | BindingFlags.Instance)
@@ -227,9 +283,9 @@ namespace Umbraco.Core.Plugins
         /// <param name="mustWrite">true if the properties discovered are writable</param>
         /// <param name="includeIndexed">true if the properties discovered are indexable</param>
         /// <returns></returns>
-        public static PropertyInfo[] CachedDiscoverableProperties(Type type, bool mustRead = true, bool mustWrite = true, bool includeIndexed = false)
+        public PropertyInfo[] CachedDiscoverableProperties(Type type, bool mustRead = true, bool mustWrite = true, bool includeIndexed = false)
         {
-            return GetPropertiesCache.GetOrAdd(
+            return _getPropertiesCache.GetOrAdd(
                 new Tuple<Type, bool, bool, bool>(type, mustRead, mustWrite, includeIndexed),
                 x => type
                          .GetProperties(BindingFlags.Public | BindingFlags.Instance)
@@ -240,7 +296,7 @@ namespace Umbraco.Core.Plugins
         }
 
 
-        #region Match Type
+#region Match Type
 
         //TODO: Need to determine if these methods should replace/combine/merge etc with IsTypeAssignableFrom, IsAssignableFromGeneric
 
@@ -251,13 +307,18 @@ namespace Umbraco.Core.Plugins
         // http://stackoverflow.com/questions/1827425/how-to-check-programatically-if-a-type-is-a-struct-or-a-class
         // http://stackoverflow.com/questions/74616/how-to-detect-if-type-is-another-generic-type/1075059#1075059
 
-        private static bool MatchGeneric(Type implementation, Type contract, IDictionary<string, Type> bindings)
+        private bool MatchGeneric(Type implementation, Type contract, IDictionary<string, Type> bindings)
         {
             // trying to match eg List<int> with List<T>
             // or List<List<List<int>>> with List<ListList<T>>>
             // classes are NOT invariant so List<string> does not match List<object>
 
+#if DNX46
             if (implementation.IsGenericType == false) return false;
+#else
+            if (implementation.GetTypeInfo().IsGenericType == false) return false;
+#endif
+
 
             // must have the same generic type definition
             var implDef = implementation.GetGenericTypeDefinition();
@@ -282,14 +343,19 @@ namespace Umbraco.Core.Plugins
             return true;
         }
 
-        public static bool MatchType(Type implementation, Type contract)
+        public bool MatchType(Type implementation, Type contract)
         {
             return MatchType(implementation, contract, new Dictionary<string, Type>());
         }
 
-        internal static bool MatchType(Type implementation, Type contract, IDictionary<string, Type> bindings, bool variance = true)
+        internal bool MatchType(Type implementation, Type contract, IDictionary<string, Type> bindings, bool variance = true)
         {
+#if DNX46
             if (contract.IsGenericType)
+#else
+            if (contract.GetTypeInfo().IsGenericType)
+#endif
+
             {
                 // eg type is List<int> or List<T>
                 // if we have variance then List<int> can match IList<T>
@@ -302,11 +368,20 @@ namespace Umbraco.Core.Plugins
                 if (variance == false) return false;
 
                 // try to match an ancestor of implementation against contract
+#if DNX46
                 var t = implementation.BaseType;
+#else
+                var t = implementation.GetTypeInfo().BaseType;
+#endif
+
                 while (t != null)
                 {
                     if (MatchGeneric(t, contract, bindings)) return true;
+#if DNX46
                     t = t.BaseType;
+#else
+                    t = t.GetTypeInfo().BaseType;
+#endif
                 }
 
                 // try to match an interface of implementation against contract
@@ -335,12 +410,18 @@ namespace Umbraco.Core.Plugins
             // http://stackoverflow.com/questions/1827425/how-to-check-programatically-if-a-type-is-a-struct-or-a-class
 
             if (implementation == contract) return true;
+
+#if DNX46
             if (contract.IsClass && implementation.IsClass && implementation.IsSubclassOf(contract)) return true;
             if (contract.IsInterface && implementation.GetInterfaces().Contains(contract)) return true;
+#else
+            if (contract.GetTypeInfo().IsClass && implementation.GetTypeInfo().IsClass && implementation.GetTypeInfo().IsSubclassOf(contract)) return true;
+            if (contract.GetTypeInfo().IsInterface && implementation.GetInterfaces().Contains(contract)) return true;
+#endif
 
             return false;
         }
 
-        #endregion
+#endregion
     }
 }

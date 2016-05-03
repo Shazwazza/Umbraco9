@@ -9,7 +9,9 @@ namespace Umbraco.Core
     /// Represents the result of an operation attempt.
     /// </summary>
     /// <typeparam name="T">The type of the attempted operation result.</typeparam>
+#if DNX46
     [Serializable]
+#endif
     public struct Attempt<T>
     {
         private readonly bool _success;

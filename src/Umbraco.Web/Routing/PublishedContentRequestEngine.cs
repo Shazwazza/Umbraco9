@@ -85,7 +85,7 @@ namespace Umbraco.Web.Routing
             // set the culture on the thread - once, so it's set when running document lookups
             if (_pcr.Culture != null)
             {
-                Thread.CurrentThread.CurrentUICulture = Thread.CurrentThread.CurrentCulture = _pcr.Culture;
+                CultureInfo.CurrentUICulture = CultureInfo.CurrentCulture = _pcr.Culture;
             }
 
             //find the published content if it's not assigned. This could be manually assigned with a custom route handler, or
@@ -103,7 +103,7 @@ namespace Umbraco.Web.Routing
             // set the culture on the thread -- again, 'cos it might have changed due to a finder or wildcard domain
             if (_pcr.Culture != null)
             {
-                Thread.CurrentThread.CurrentUICulture = Thread.CurrentThread.CurrentCulture = _pcr.Culture;
+                CultureInfo.CurrentUICulture = CultureInfo.CurrentCulture = _pcr.Culture;
             }
 
             // trigger the Prepared event - at that point it is still possible to change about anything
@@ -141,7 +141,7 @@ namespace Umbraco.Web.Routing
             // set the culture on the thread -- again, 'cos it might have changed in the event handler
             if (_pcr.Culture != null)
             {
-                Thread.CurrentThread.CurrentUICulture = Thread.CurrentThread.CurrentCulture = _pcr.Culture;
+                CultureInfo.CurrentUICulture = CultureInfo.CurrentCulture = _pcr.Culture;
             }
 
             // if request has been flagged to redirect, or has no content to display,

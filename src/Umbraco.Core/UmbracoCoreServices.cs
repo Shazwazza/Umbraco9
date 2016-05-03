@@ -13,6 +13,7 @@ namespace Umbraco.Core
         public static IServiceCollection AddUmbracoCore(this IServiceCollection services)
         {
             services.AddSingleton<IUmbracoAssemblyProvider, ReferencedAssemblyProvider>();
+            services.AddSingleton<TypeHelper>();
             services.AddSingleton<ITypeFinder, TypeFinder>();
 
             return services;

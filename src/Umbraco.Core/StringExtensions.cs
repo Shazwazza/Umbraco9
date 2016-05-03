@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Umbraco.Core
 {
@@ -60,7 +56,12 @@ namespace Umbraco.Core
                    || (input.StartsWith("[") && input.EndsWith("]"));
         }
 
+#if DNX46
         internal static readonly Regex Whitespace = new Regex(@"\s+", RegexOptions.Compiled);
+#else
+        internal static readonly Regex Whitespace = new Regex(@"\s+");
+#endif
+
         internal static readonly string[] JsonEmpties = new[] { "[]", "{}" };
         internal static bool DetectIsEmptyJson(this string input)
         {
@@ -73,7 +74,11 @@ namespace Umbraco.Core
             var mName = input;
             foreach (var c in mName.ToCharArray().Where(c => !char.IsLetterOrDigit(c)))
             {
+#if DNX46
                 mName = mName.Replace(c.ToString(CultureInfo.InvariantCulture), replacement);
+#else
+                mName = mName.Replace(c.ToString(), replacement);
+#endif
             }
             return mName;
         }
@@ -258,9 +263,9 @@ namespace Umbraco.Core
             if (string.IsNullOrEmpty(value)) return value;
             if (string.IsNullOrEmpty(forRemoving)) return value;
 
-            while (value.EndsWith(forRemoving, StringComparison.InvariantCultureIgnoreCase))
+            while (value.EndsWith(forRemoving, StringComparison.OrdinalIgnoreCase))
             {
-                value = value.Remove(value.LastIndexOf(forRemoving, StringComparison.InvariantCultureIgnoreCase));
+                value = value.Remove(value.LastIndexOf(forRemoving, StringComparison.OrdinalIgnoreCase));
             }
             return value;
         }
@@ -270,7 +275,7 @@ namespace Umbraco.Core
             if (string.IsNullOrEmpty(value)) return value;
             if (string.IsNullOrEmpty(forRemoving)) return value;
 
-            while (value.StartsWith(forRemoving, StringComparison.InvariantCultureIgnoreCase))
+            while (value.StartsWith(forRemoving, StringComparison.OrdinalIgnoreCase))
             {
                 value = value.Substring(forRemoving.Length);
             }
@@ -285,27 +290,48 @@ namespace Umbraco.Core
 
         public static string EnsureStartsWith(this string input, char value)
         {
+#if DNX46
             return input.StartsWith(value.ToString(CultureInfo.InvariantCulture)) ? input : value + input;
+#else
+            return input.StartsWith(value.ToString()) ? input : value + input;
+#endif
         }
 
         public static string EnsureEndsWith(this string input, char value)
         {
+#if DNX46
             return input.EndsWith(value.ToString(CultureInfo.InvariantCulture)) ? input : input + value;
+#else
+            return input.EndsWith(value.ToString()) ? input : input + value;
+#endif
         }
 
         public static string EnsureEndsWith(this string input, string toEndWith)
         {
+#if DNX46
             return input.EndsWith(toEndWith.ToString(CultureInfo.InvariantCulture)) ? input : input + toEndWith;
+#else
+            return input.EndsWith(toEndWith.ToString()) ? input : input + toEndWith;
+
+#endif
         }
 
         public static bool IsLowerCase(this char ch)
         {
+#if DNX46
             return ch.ToString(CultureInfo.InvariantCulture) == ch.ToString(CultureInfo.InvariantCulture).ToLowerInvariant();
+#else
+            return ch.ToString() == ch.ToString().ToLowerInvariant();
+#endif
         }
 
         public static bool IsUpperCase(this char ch)
         {
+#if DNX46
             return ch.ToString(CultureInfo.InvariantCulture) == ch.ToString(CultureInfo.InvariantCulture).ToUpperInvariant();
+#else
+            return ch.ToString() == ch.ToString().ToUpperInvariant();
+#endif
         }
 
         /// <summary>Is null or white space.</summary>
@@ -325,7 +351,6 @@ namespace Umbraco.Core
         /// <param name="list">The list.</param>
         /// <param name="delimiter">The delimiter.</param>
         /// <returns>the list</returns>
-        [SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "By design")]
         public static IList<string> ToDelimitedList(this string list, string delimiter = ",")
         {
             var delimiters = new[] { delimiter };
@@ -342,8 +367,6 @@ namespace Umbraco.Core
         /// <param name="result">The result.</param>
         /// <typeparam name="T">The type</typeparam>
         /// <returns>The enum try parse.</returns>
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "By Design")]
-        [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#", Justification = "By Design")]
         public static bool EnumTryParse<T>(this string strType, bool ignoreCase, out T result)
         {
             try
@@ -365,8 +388,6 @@ namespace Umbraco.Core
         /// <param name="strType">The string to parse</param>
         /// <param name="ignoreCase">The ignore case</param>
         /// <returns>The parsed enum</returns>
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "By Design")]
-        [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#", Justification = "By Design")]
         public static T EnumParse<T>(this string strType, bool ignoreCase)
         {
             return (T)Enum.Parse(typeof(T), strType, ignoreCase);
@@ -458,7 +479,7 @@ namespace Umbraco.Core
             {
                 //var decodedBytes = Convert.FromBase64String(input.Replace("-", ".").Replace("_", "/").Replace(",", "="));
                 byte[] decodedBytes = UrlTokenDecode(input);
-                return decodedBytes != null ? Encoding.UTF8.GetString(decodedBytes) : null;
+                return decodedBytes != null ? Encoding.UTF8.GetString(decodedBytes, 0, decodedBytes.Length) : null;
             }
             catch (FormatException)
             {
@@ -495,17 +516,17 @@ namespace Umbraco.Core
         /// <returns></returns>
         public static bool InvariantEquals(this string compare, string compareTo)
         {
-            return String.Equals(compare, compareTo, StringComparison.InvariantCultureIgnoreCase);
+            return String.Equals(compare, compareTo, StringComparison.OrdinalIgnoreCase);
         }
 
         public static bool InvariantStartsWith(this string compare, string compareTo)
         {
-            return compare.StartsWith(compareTo, StringComparison.InvariantCultureIgnoreCase);
+            return compare.StartsWith(compareTo, StringComparison.OrdinalIgnoreCase);
         }
 
         public static bool InvariantEndsWith(this string compare, string compareTo)
         {
-            return compare.EndsWith(compareTo, StringComparison.InvariantCultureIgnoreCase);
+            return compare.EndsWith(compareTo, StringComparison.OrdinalIgnoreCase);
         }
 
         public static bool InvariantContains(this string compare, string compareTo)
@@ -515,7 +536,7 @@ namespace Umbraco.Core
 
         public static bool InvariantContains(this IEnumerable<string> compare, string compareTo)
         {
-            return compare.Contains(compareTo, StringComparer.InvariantCultureIgnoreCase);
+            return compare.Contains(compareTo, StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -543,63 +564,6 @@ namespace Umbraco.Core
             }
 
             return isGuid;
-        }
-
-        /// <summary>
-        /// Tries to parse a string into the supplied type by finding and using the Type's "Parse" method
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="val"></param>
-        /// <returns></returns>
-        public static T ParseInto<T>(this string val)
-        {
-            return (T)val.ParseInto(typeof(T));
-        }
-
-        /// <summary>
-        /// Tries to parse a string into the supplied type by finding and using the Type's "Parse" method
-        /// </summary>
-        /// <param name="val"></param>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        public static object ParseInto(this string val, Type type)
-        {
-            if (!String.IsNullOrEmpty(val))
-            {
-                TypeConverter tc = TypeDescriptor.GetConverter(type);
-                return tc.ConvertFrom(val);
-            }
-            return val;
-        }
-
-        /// <summary>
-        /// Converts the string to MD5
-        /// </summary>
-        /// <param name="stringToConvert">referrs to itself</param>
-        /// <returns>the md5 hashed string</returns>
-        public static string ToMd5(this string stringToConvert)
-        {
-            //create an instance of the MD5CryptoServiceProvider
-            var md5Provider = new MD5CryptoServiceProvider();
-
-            //convert our string into byte array
-            var byteArray = Encoding.UTF8.GetBytes(stringToConvert);
-
-            //get the hashed values created by our MD5CryptoServiceProvider
-            var hashedByteArray = md5Provider.ComputeHash(byteArray);
-
-            //create a StringBuilder object
-            var stringBuilder = new StringBuilder();
-
-            //loop to each each byte
-            foreach (var b in hashedByteArray)
-            {
-                //append it to our StringBuilder
-                stringBuilder.Append(b.ToString("x2").ToLower());
-            }
-
-            //return the hashed value
-            return stringBuilder.ToString();
         }
 
 
@@ -788,7 +752,12 @@ namespace Umbraco.Core
         {
             return string.IsNullOrWhiteSpace(input)
                 ? input
+#if DNX46
                 : input.Substring(0, 1).ToUpper(culture) + input.Substring(1);
+#else
+                : input.Substring(0, 1).ToUpper() + input.Substring(1);
+#endif
+
         }
 
         /// <summary>
@@ -801,7 +770,11 @@ namespace Umbraco.Core
         {
             return string.IsNullOrWhiteSpace(input)
                 ? input
+#if DNX46
                 : input.Substring(0, 1).ToLower(culture) + input.Substring(1);
+#else
+                : input.Substring(0, 1).ToLower() + input.Substring(1);
+#endif
         }
 
         /// <summary>
@@ -922,8 +895,11 @@ namespace Umbraco.Core
         // filters control characters but allows only properly-formed surrogate sequences
         private static readonly Regex InvalidXmlChars =
             new Regex(
-                @"(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F\uFEFF\uFFFE\uFFFF]",
-                RegexOptions.Compiled);
+                @"(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F\uFEFF\uFFFE\uFFFF]"
+#if DNX46
+                , RegexOptions.Compiled
+#endif
+                );
 
 
         /// <summary>
@@ -941,18 +917,18 @@ namespace Umbraco.Core
             return string.IsNullOrEmpty(text) ? text : InvalidXmlChars.Replace(text, "");
         }
 
-        /// <summary>
-        /// Converts a string to a Guid - WARNING, depending on the string, this may not be unique
-        /// </summary>
-        /// <param name="text"></param>
-        /// <returns></returns>
-        internal static Guid ToGuid(this string text)
-        {
-            var md5 = MD5.Create();
-            byte[] myStringBytes = Encoding.ASCII.GetBytes(text);
-            byte[] hash = md5.ComputeHash(myStringBytes);
-            return new Guid(hash);
-        }
+        ///// <summary>
+        ///// Converts a string to a Guid - WARNING, depending on the string, this may not be unique
+        ///// </summary>
+        ///// <param name="text"></param>
+        ///// <returns></returns>
+        //internal static Guid ToGuid(this string text)
+        //{
+        //    var md5 = MD5.Create();
+        //    byte[] myStringBytes = Encoding.ASCII.GetBytes(text);
+        //    byte[] hash = md5.ComputeHash(myStringBytes);
+        //    return new Guid(hash);
+        //}
     }
 
 }

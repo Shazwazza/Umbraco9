@@ -81,11 +81,18 @@ namespace Umbraco.Web.Plugins
         /// </summary>        
         protected override IEnumerable<Library> GetCandidateLibraries()
         {
+#if DNX46
             return base.GetCandidateLibraries().Concat(
-                _umbracoAssemblyProvider.CandidateAssemblies.Select(
-                    x => new Library(x.FullName, null, Path.GetDirectoryName(x.Location), null, Enumerable.Empty<string>(),
-                        new[] {new AssemblyName(x.FullName)})));
-
+                _umbracoAssemblyProvider.CandidateAssemblies.Select(x =>
+                    new Library(x.FullName, null, Path.GetDirectoryName(x.Location), null, Enumerable.Empty<string>(), 
+                    new[] { new AssemblyName(x.FullName) })));
+#else
+            //see: https://github.com/dotnet/corefx/pull/3861
+            //https://github.com/dotnet/corefx/issues/2221
+            //https://github.com/dotnet/corefx/pull/3861
+            throw new NotSupportedException("FIXME when RC2 is out, apparently this should be there");
+#endif
+            
         }
     }
 }
