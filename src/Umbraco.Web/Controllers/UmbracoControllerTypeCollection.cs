@@ -24,7 +24,8 @@ namespace Umbraco.Web.Controllers
             {
                 return actionDescriptorProviderContext.ActionDescriptors.Items
                     .OfType<ControllerActionDescriptor>()
-                    .Where(x => typeof (UmbracoController).GetTypeInfo().IsAssignableFrom(x.ControllerTypeInfo))
+                    .Where(x => typeof (IUmbracoController).GetTypeInfo().IsAssignableFrom(x.ControllerTypeInfo))
+                    //.Where(x => typeof (UmbracoController).GetTypeInfo().IsAssignableFrom(x.ControllerTypeInfo))
                     .ToArray();
             });
         }

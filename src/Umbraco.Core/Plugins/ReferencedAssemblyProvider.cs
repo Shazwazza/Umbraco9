@@ -12,6 +12,19 @@ namespace Umbraco.Core.Plugins
     public class ReferencedAssemblyProvider : IUmbracoAssemblyProvider
     {
         private readonly ILibraryManager _libraryManager;
+        private readonly IAssemblyLoadContextAccessor _loadContextAccessor;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="libraryManager"></param>
+        /// <param name="loadContextAccessor"></param>
+        public ReferencedAssemblyProvider(ILibraryManager libraryManager,
+            IAssemblyLoadContextAccessor loadContextAccessor)
+        {
+            _libraryManager = libraryManager;
+            _loadContextAccessor = loadContextAccessor;
+        }
 
         /// <summary>
         /// Gets the set of assembly names that are used as root for discovery of umbraco plugins
@@ -27,15 +40,6 @@ namespace Umbraco.Core.Plugins
             get { return GetCandidateLibraries().SelectMany(l => l.Assemblies).Select(Load); }
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="libraryManager"></param>
-        public ReferencedAssemblyProvider(ILibraryManager libraryManager)
-        {
-            _libraryManager = libraryManager;
-        }
-
         protected IEnumerable<Library> GetCandidateLibraries()
         {
             return ReferenceAssemblies == null
@@ -43,9 +47,9 @@ namespace Umbraco.Core.Plugins
                 : ReferenceAssemblies.SelectMany(_libraryManager.GetReferencingLibraries).Distinct().Where(IsCandidateLibrary);
         }
 
-        private static Assembly Load(AssemblyName assemblyName)
+        private Assembly Load(AssemblyName assemblyName)
         {
-            return Assembly.Load(assemblyName);
+            return _loadContextAccessor.Default.Load(assemblyName);
         }
 
         private bool IsCandidateLibrary(Library library)

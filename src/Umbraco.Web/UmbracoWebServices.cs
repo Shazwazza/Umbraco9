@@ -5,6 +5,7 @@ using Microsoft.AspNet.FileProviders;
 using Microsoft.AspNet.Hosting;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.Controllers;
+using Microsoft.AspNet.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.PlatformAbstractions;
@@ -21,19 +22,23 @@ namespace Umbraco.Web
         public static IServiceCollection AddUmbraco(this IServiceCollection services)
         {
             services.AddUmbracoCore();
-
-            services.AddSingleton<IUmbracoAssemblyProvider, PluginAssemblyProvider>(provider =>
-            {
-                var hosting = provider.GetRequiredService<IApplicationEnvironment>();
-                var fileProvider = new PhysicalFileProvider(hosting.ApplicationBasePath);
-                return new PluginAssemblyProvider(fileProvider, provider.GetRequiredService<ILoggerFactory>());
-            });
-            
             services.AddCaching();
             services.AddSession();
             services.AddMvc();
             //services.AddAuthentication();
             //services.AddAuthorization();
+
+            //replace the MVC one
+            services.AddSingleton<IAssemblyProvider, MvcPluginAssemblyProvider>();
+
+            services.AddSingleton<IUmbracoAssemblyProvider, PluginAssemblyProvider>(provider =>
+            {
+                var hosting = provider.GetRequiredService<IApplicationEnvironment>();
+                var fileProvider = new PhysicalFileProvider(hosting.ApplicationBasePath);
+                return new PluginAssemblyProvider(fileProvider, provider.GetRequiredService<ILoggerFactory>(),
+                    PlatformServices.Default.AssemblyLoadContextAccessor,
+                    PlatformServices.Default.AssemblyLoaderContainer);
+            });
 
             services.AddAuthorization(options =>
             {
@@ -54,6 +59,7 @@ namespace Umbraco.Web
             //services.AddIdentity<BackOfficeUser, IdentityRole>();
 
             services.AddSingleton<IControllerActivator, UmbracoControllerActivator>();
+            services.AddTransient<UmbracoControllerHelper>();
             //services.AddSingleton<UmbracoAssemblyProvider>();
             services.AddSingleton<IUmbracoConfig, UmbracoConfig>();
             services.AddSingleton<UmbracoControllerTypeCollection>();

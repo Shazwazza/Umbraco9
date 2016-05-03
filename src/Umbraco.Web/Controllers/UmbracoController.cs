@@ -7,14 +7,16 @@ using Umbraco.Web.Models;
 using Umbraco.Web.Routing;
 
 namespace Umbraco.Web.Controllers
-{   
-
+{
     /// <summary>
     /// The default Umbraco rendering controller (i.e. previously RenderMvcController)
     /// </summary>
-    public class UmbracoController : Controller
+    public class UmbracoController : Controller, IUmbracoController
     {
         private readonly UmbracoContext _umbraco;
+        private UmbracoControllerHelper _controllerHelper;
+        protected UmbracoControllerHelper ControllerHelper 
+            => _controllerHelper ?? (_controllerHelper = new UmbracoControllerHelper(_umbraco));
 
         public UmbracoController(UmbracoContext umbraco)
         {
@@ -28,13 +30,13 @@ namespace Umbraco.Web.Controllers
                 throw new Exception("No content");
             }
 
-            return Task.FromResult(UmbracoViewForRoute(publishedContent));
+            return Task.FromResult(UmbracoViewForRoute());
         }
 
-        protected ActionResult UmbracoViewForRoute(IPublishedContent publishedContent)
+        protected ActionResult UmbracoViewForRoute()
         {
             //TODO: Need view engine
-            return View("~/Views/" + _umbraco.PublishedContentRequest.TemplateAlias + ".cshtml", _umbraco.PublishedContent);
+            return ControllerHelper.UmbracoViewForRoute(View);
         }
     }
     

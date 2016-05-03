@@ -1,7 +1,7 @@
 ﻿@using Umbraco.ViewModels
 @using Umbraco.Web;
 @inject UmbracoContext UmbracoContext
-@model Umbraco.Web.Models.PublishedContent
+@model dynamic
 
 @{
     ViewData["Title"] = Model.Name;
@@ -11,7 +11,7 @@
 
     <h1>@Model.Name</h1>
 
-    <p>Hello world, I'm an Umbraco document</p>
+    <p>@Model.Message</p>
 
     @if (ViewBag.message != null)
     {

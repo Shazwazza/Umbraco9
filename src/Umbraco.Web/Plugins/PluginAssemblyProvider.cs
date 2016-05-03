@@ -18,13 +18,18 @@ namespace Umbraco.Web.Plugins
     public class PluginAssemblyProvider : IUmbracoAssemblyProvider
     {
         private readonly IFileProvider _fileProvider;
+        private readonly IAssemblyLoadContextAccessor _loadContextAccessor;
+        private readonly IAssemblyLoaderContainer _assemblyLoaderContainer;
         private readonly Lazy<IEnumerable<Assembly>> _candidates;
         private readonly ILogger _logger;
 
-        public PluginAssemblyProvider(IFileProvider fileProvider, ILoggerFactory loggerFactory)
+        public PluginAssemblyProvider(IFileProvider fileProvider, ILoggerFactory loggerFactory,
+            IAssemblyLoadContextAccessor loadContextAccessor, IAssemblyLoaderContainer assemblyLoaderContainer)
         {
             _logger = loggerFactory.CreateLogger<PluginAssemblyProvider>();
             _fileProvider = fileProvider;
+            _loadContextAccessor = loadContextAccessor;
+            _assemblyLoaderContainer = assemblyLoaderContainer;
             _candidates = new Lazy<IEnumerable<Assembly>>(FindPluginAssemblies);
         }
 
@@ -32,6 +37,9 @@ namespace Umbraco.Web.Plugins
 
         private IEnumerable<Assembly> FindPluginAssemblies()
         {
+            //TODO: Do not include any assemblies that have already been loaded or are referenced as normal reference
+            // assemblies, this could be done if a developer included library/framework assemblies with their package.
+
             var content = _fileProvider.GetDirectoryContents("/App_Plugins");
             if (!content.Exists) yield break;
             foreach (var pluginDir in content.Where(x => x.IsDirectory))
@@ -53,17 +61,17 @@ namespace Umbraco.Web.Plugins
         private IEnumerable<Assembly> GetAssembliesInFolder(DirectoryInfo binPath)
         {
             // Use the default load context
-            var loadContext = PlatformServices.Default.AssemblyLoadContextAccessor.Default;
+            var loadContext = _loadContextAccessor.Default;
 
             // Add the loader to the container so that any call to Assembly.Load will call the load context back (if it's not already loaded)
-            using (PlatformServices.Default.AssemblyLoaderContainer.AddLoader(
-                new DirectoryLoader(binPath, loadContext)))
+            using (_assemblyLoaderContainer.AddLoader(new DirectoryLoader(binPath, loadContext)))
             {
                 foreach (var fileSystemInfo in binPath.GetFileSystemInfos("*.dll"))
                 {
                     //// You should be able to use Assembly.Load()
-                    //var assembly1 = Assembly.Load(new AssemblyName("SomethingElse"));
-                    var assembly2 = loadContext.Load(Path.GetFileNameWithoutExtension(fileSystemInfo.Name));
+                    //var assembly1 = Assembly.Load(AssemblyName.GetAssemblyName(fileSystemInfo.FullName));
+                    var assembly2 = loadContext.Load(AssemblyName.GetAssemblyName(fileSystemInfo.FullName));
+
                     yield return assembly2;
                 }
             }

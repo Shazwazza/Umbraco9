@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Umbraco.Web;
+﻿using Umbraco.Web;
 using Umbraco.Web.Controllers;
 
-namespace Umbraco.PluginExamples
+namespace Umbraco.PluginExamples.Controllers
 {
     
+
     public class ExamplePluginSurfaceController : SurfaceController
     {
         public ExamplePluginSurfaceController(UmbracoContext umbracoContext) : base(umbracoContext)
